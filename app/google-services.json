@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "199490812587",
+    "project_id": "sirasa-service",
+    "storage_bucket": "sirasa-service.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199490812587:android:0976190cd03f47e17f15ee",
+        "android_client_info": {
+          "package_name": "com.dev.sirasa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQj0A-nhiGTy2dN17qdxD_QfxuHJxWmmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

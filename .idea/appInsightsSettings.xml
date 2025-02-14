@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.dev.sirasa" />
+                  <option name="mobileSdkAppId" value="1:199490812587:android:0976190cd03f47e17f15ee" />
+                  <option name="projectId" value="sirasa-service" />
+                  <option name="projectNumber" value="199490812587" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
