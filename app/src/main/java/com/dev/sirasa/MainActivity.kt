@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.dev.sirasa.screens.common.email_verification.VerifiedAccountScreen
+import com.dev.sirasa.screens.common.forget_password.ResetPasswordScreen
 import com.dev.sirasa.screens.common.login.LoginScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
 
@@ -26,7 +27,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background
                     ) { innerPadding ->
-                    VerifiedAccountScreen()
+                    ResetPasswordScreen(
+                        onBack = {},
+                        onEmailSent = {}
+                    )
                 }
             }
         }

@@ -15,11 +15,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.sirasa.R
+import com.dev.sirasa.ui.component.PasswordField
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 
@@ -29,7 +28,6 @@ fun LoginScreen() {
     val listOption = listOf("Email", "NIM")
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    // TabRow dengan bentuk kotak rounded 16dp
     var email by remember { mutableStateOf("") }
     var nim by remember { mutableStateOf("") }
 
@@ -172,36 +170,7 @@ fun LoginScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Password Input
-        Text(
-            text = "Password",
-            style = Typography.bodyMedium,
-            modifier = Modifier.align(Alignment.Start).padding(bottom = 10.dp)
-        )
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            textStyle = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(Color.White, RoundedCornerShape(8.dp)),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFE2E8F0),
-            ),
-            placeholder = { Text("Masukkan Password Anda", style = Typography.bodyMedium, color = Color.Gray) },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        painter = painterResource(id = if (passwordVisible) R.drawable.ic_lock_show_password else R.drawable.ic_lock_hide_password),
-                        contentDescription = if (passwordVisible) "Hide Password" else "Show Password",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-        )
+        PasswordField(label = "Password", value = password, onValueChange = { password = it }, passwordVisible = passwordVisible, onTogglePassword = { passwordVisible = !passwordVisible })
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
