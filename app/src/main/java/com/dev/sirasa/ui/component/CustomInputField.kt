@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.dev.sirasa.ui.theme.Typography
 
 @Composable
-fun InputField(label: String, value: String, onValueChange: (String) -> Unit, keyboardType: KeyboardType = KeyboardType.Text) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+fun InputField(label: String,placeHolder: String, value: String, onValueChange: (String) -> Unit, keyboardType: KeyboardType = KeyboardType.Text ,modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Text(text = label, style = Typography.displayMedium, modifier = Modifier.padding(bottom = 8.dp))
         OutlinedTextField(
             value = value,
@@ -31,12 +31,54 @@ fun InputField(label: String, value: String, onValueChange: (String) -> Unit, ke
                 .fillMaxWidth()
                 .height(48.dp)
                 .background(Color.White, RoundedCornerShape(8.dp)),
-            placeholder = { Text(text = "Masukkan $label", style = Typography.bodyMedium, color = Color.Gray) },
+            placeholder = { Text(text = "$placeHolder", style = Typography.bodyMedium, color = Color.Gray) },
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color(0xFFE2E8F0),
             ),
+        )
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+fun InputFieldTextArea(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    minLines: Int = 4,
+    maxLines: Int = 6
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            style = Typography.displayMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height((minLines * 24).dp)
+                .background(Color.White, RoundedCornerShape(8.dp)),
+            placeholder = {
+                Text(
+                    text = "Masukkan $label",
+                    style = Typography.bodyMedium,
+                    color = Color.Gray
+                )
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Color(0xFFE2E8F0),
+            ),
+            minLines = minLines,
+            maxLines = maxLines
         )
     }
     Spacer(modifier = Modifier.height(8.dp))

@@ -41,12 +41,17 @@ val Typography = Typography(
     bodyMedium = TextStyle(
         fontFamily = interFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp
+        fontSize = 13.sp
     ),
     bodySmall = TextStyle(
         fontFamily = interFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp
+    ),
+    displayLarge = TextStyle(
+        fontFamily = interFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp
     ),
     displayMedium = TextStyle(
         fontFamily = interFontFamily,

@@ -58,7 +58,7 @@ fun ResetPasswordScreen(onBack: () -> Unit, onEmailSent: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            InputField(label = "Email", value = email, onValueChange = { email = it }, keyboardType = KeyboardType.Email)
+            InputField(label = "Email", placeHolder = "Masukkan Email" , value = email, onValueChange = { email = it }, keyboardType = KeyboardType.Email)
 
             Spacer(modifier = Modifier.height(16.dp))
 
