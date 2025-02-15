@@ -12,9 +12,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.dev.sirasa.screens.common.email_verification.VerifiedAccountScreen
 import com.dev.sirasa.screens.common.forget_password.ResetPasswordScreen
 import com.dev.sirasa.screens.common.login.LoginScreen
+import com.dev.sirasa.screens.common.register.RegisterScreen
+import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItem
+import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavUser
 import com.dev.sirasa.ui.theme.SirasaTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,10 +33,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background
                     ) { innerPadding ->
-                    ResetPasswordScreen(
-                        onBack = {},
-                        onEmailSent = {}
-                    )
+                    MainScreen()
                 }
             }
         }
@@ -38,17 +41,21 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun MainScreen() {
+    val navController = rememberNavController()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SirasaTheme {
-        Greeting("Android")
+    Scaffold(
+        bottomBar = { BottomNavUser(navController) }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = BottomNavItem.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(BottomNavItem.Home.route) { LoginScreen() }
+            composable(BottomNavItem.Room.route) { RegisterScreen() }
+            composable(BottomNavItem.History.route) { VerifiedAccountScreen() }
+            composable(BottomNavItem.Profile.route) { Text("Profile Screen") }
+        }
     }
 }
