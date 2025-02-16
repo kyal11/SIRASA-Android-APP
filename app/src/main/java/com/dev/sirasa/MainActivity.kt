@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dev.sirasa.screens.common.email_verification.VerifiedAccountScreen
 import com.dev.sirasa.screens.common.forget_password.ResetPasswordScreen
 import com.dev.sirasa.screens.common.login.LoginScreen
+import com.dev.sirasa.screens.common.profile.ProfileScreen
 import com.dev.sirasa.screens.common.register.RegisterScreen
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItem
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavUser
@@ -56,7 +57,7 @@ fun MainScreen() {
             composable(BottomNavItem.Home.route) { UserHomeScreen() }
             composable(BottomNavItem.Room.route) { RegisterScreen() }
             composable(BottomNavItem.History.route) { VerifiedAccountScreen() }
-            composable(BottomNavItem.Profile.route) { Text("Profile Screen") }
+            composable(BottomNavItem.Profile.route) { ProfileScreen() }
         }
     }
 }

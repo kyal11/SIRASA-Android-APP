@@ -118,10 +118,11 @@ fun UserHomeScreen() {
         Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = { /* TODO: Implementasi Register */ },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(text = "Submit")
+            Text(text = "Submit", style = Typography.titleMedium)
         }
     }
 }

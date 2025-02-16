@@ -195,11 +195,13 @@ fun LoginScreen() {
         Row {
             Text(text = "Belum mempunyai akun?", style = Typography.bodyMedium)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Daftar",
-                style = Typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            TextButton( onClick = {} ) {
+                Text(
+                    text = "Daftar",
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
