@@ -293,16 +293,17 @@ fun CardHistory(
 fun QrCodeDialog(idBooking: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = { onDismiss() },
+        containerColor = Color.White,
         confirmButton = {
             Button(onClick = { onDismiss() }) {
                 Text("Tutup")
             }
         },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.fillMaxWidth() ,horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("QR Code Booking", style = Typography.titleMedium)
                 Spacer(modifier = Modifier.height(10.dp))
-                GenerateQrCode(idBooking) // Panggil fungsi QR Code
+                GenerateQrCode(idBooking)
             }
         }
     )
@@ -314,7 +315,7 @@ fun GenerateQrCode(text: String) {
         Image(
             bitmap = bitmap.asImageBitmap(),
             contentDescription = "QR Code",
-            modifier = Modifier.size(200.dp)
+            modifier = Modifier.size(250.dp)
         )
     }
 }

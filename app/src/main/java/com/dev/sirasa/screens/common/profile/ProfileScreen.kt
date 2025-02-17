@@ -100,6 +100,7 @@ fun ProfileScreen() {
             onDismissRequest = { showLogoutDialog = false },
             title = { Text("Confirm Logout") },
             text = { Text("Are you sure you want to logout?") },
+            containerColor = Color.White,
             confirmButton = {
                 TextButton(onClick = { showLogoutDialog = false /* Handle Logout */ }) {
                     Text("Yes")
@@ -107,7 +108,7 @@ fun ProfileScreen() {
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text("Cancel", color = Color.Red)
                 }
             }
         )
@@ -148,6 +149,7 @@ fun EditProfileDialog(field: String, currentValue: String, onDismiss: () -> Unit
                 Text("Save")
             }
         },
+        containerColor = Color.White,
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
