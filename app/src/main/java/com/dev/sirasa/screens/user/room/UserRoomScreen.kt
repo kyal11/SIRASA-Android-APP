@@ -29,7 +29,7 @@ fun CardRoom() {
 fun PreviewCard() {
 
 }
-@Preview(showBackground = true)
-@Composable
-fun PreviewUserRoom() {
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewUserRoom() {
+//}

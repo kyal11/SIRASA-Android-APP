@@ -22,6 +22,7 @@ import com.dev.sirasa.screens.common.profile.ProfileScreen
 import com.dev.sirasa.screens.common.register.RegisterScreen
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItem
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavUser
+import com.dev.sirasa.screens.user.history.UserHistoryScreen
 import com.dev.sirasa.screens.user.home.UserHomeScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
 
@@ -56,7 +57,7 @@ fun MainScreen() {
         ) {
             composable(BottomNavItem.Home.route) { UserHomeScreen() }
             composable(BottomNavItem.Room.route) { RegisterScreen() }
-            composable(BottomNavItem.History.route) { VerifiedAccountScreen() }
+            composable(BottomNavItem.History.route) { UserHistoryScreen() }
             composable(BottomNavItem.Profile.route) { ProfileScreen() }
         }
     }
