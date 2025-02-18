@@ -24,6 +24,7 @@ import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItem
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavUser
 import com.dev.sirasa.screens.user.history.UserHistoryScreen
 import com.dev.sirasa.screens.user.home.UserHomeScreen
+import com.dev.sirasa.screens.user.room.UserRoomScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
 
 class MainActivity : ComponentActivity() {
@@ -56,7 +57,7 @@ fun MainScreen() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(BottomNavItem.Home.route) { UserHomeScreen() }
-            composable(BottomNavItem.Room.route) { RegisterScreen() }
+            composable(BottomNavItem.Room.route) { UserRoomScreen() }
             composable(BottomNavItem.History.route) { UserHistoryScreen() }
             composable(BottomNavItem.Profile.route) { ProfileScreen() }
         }
