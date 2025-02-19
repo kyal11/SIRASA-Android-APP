@@ -30,6 +30,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            val apiBaseUrl = localProperties.getProperty("API_BASE_URL")
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl}\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
