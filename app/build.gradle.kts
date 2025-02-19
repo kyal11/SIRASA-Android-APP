@@ -1,9 +1,17 @@
+import java.io.FileInputStream
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
-
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("gradle.properties")
+if (localPropertiesFile.exists() && localPropertiesFile.canRead()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
 android {
     namespace = "com.dev.sirasa"
     compileSdk = 35
@@ -28,6 +36,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            val apiBaseUrl = localProperties.getProperty("API_BASE_URL")
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl}\"")
         }
     }
     compileOptions {
@@ -39,6 +49,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -48,9 +59,18 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
 
+}
+kapt {
+    correctErrorTypes = true
+}
 dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.2")
     implementation("com.google.zxing:core:3.5.1")
     implementation("androidx.navigation:navigation-compose:2.8.7")
     implementation("com.airbnb.android:lottie-compose:6.6.2")

@@ -1,7 +1,5 @@
 package com.dev.sirasa.screens.user.bottom_nav_bar
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,10 +22,10 @@ import com.dev.sirasa.ui.theme.Typography
 @Composable
 fun BottomNavUser(navController: NavController) {
     val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Room,
-        BottomNavItem.History,
-        BottomNavItem.Profile
+        BottomNavItemUser.Home,
+        BottomNavItemUser.Room,
+        BottomNavItemUser.History,
+        BottomNavItemUser.Profile
     )
     val currentRoute = navController.currentBackStackEntryAsState()
         .value?.destination?.route

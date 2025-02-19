@@ -8,19 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dev.sirasa.screens.common.email_verification.VerifiedAccountScreen
-import com.dev.sirasa.screens.common.forget_password.ResetPasswordScreen
-import com.dev.sirasa.screens.common.login.LoginScreen
+import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavAdmin
+import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavItemAdmin
+import com.dev.sirasa.screens.admin.dashboard.DashboardScreen
+import com.dev.sirasa.screens.admin.data.DataScreen
 import com.dev.sirasa.screens.common.profile.ProfileScreen
-import com.dev.sirasa.screens.common.register.RegisterScreen
-import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItem
+import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItemUser
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavUser
 import com.dev.sirasa.screens.user.history.UserHistoryScreen
 import com.dev.sirasa.screens.user.home.UserHomeScreen
@@ -37,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background
                     ) { innerPadding ->
-                    MainScreen()
+                    MainScreenAdmin()
                 }
             }
         }
@@ -53,13 +51,33 @@ fun MainScreen() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = BottomNavItem.Home.route,
+            startDestination = BottomNavItemUser.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(BottomNavItem.Home.route) { UserHomeScreen() }
-            composable(BottomNavItem.Room.route) { UserRoomScreen() }
-            composable(BottomNavItem.History.route) { UserHistoryScreen() }
-            composable(BottomNavItem.Profile.route) { ProfileScreen() }
+            composable(BottomNavItemUser.Home.route) { UserHomeScreen() }
+            composable(BottomNavItemUser.Room.route) { UserRoomScreen() }
+            composable(BottomNavItemUser.History.route) { UserHistoryScreen() }
+            composable(BottomNavItemUser.Profile.route) { ProfileScreen() }
+        }
+    }
+}
+
+@Composable
+fun MainScreenAdmin() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = { BottomNavAdmin(navController) }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = BottomNavItemAdmin.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(BottomNavItemAdmin.Home.route) { DashboardScreen() }
+            composable(BottomNavItemAdmin.Room.route) { UserRoomScreen() }
+            composable(BottomNavItemAdmin.Data.route) { DataScreen() }
+            composable(BottomNavItemAdmin.Profile.route) { ProfileScreen() }
         }
     }
 }
