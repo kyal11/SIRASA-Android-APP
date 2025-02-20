@@ -17,13 +17,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.dev.sirasa.R
 import com.dev.sirasa.ui.component.PasswordField
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+    val loginState by viewModel.loginState.collectAsState()
     var selectedOption by remember { mutableIntStateOf(0) }
     val listOption = listOf("Email", "NIM")
     var password by remember { mutableStateOf("") }
@@ -206,10 +212,10 @@ fun LoginScreen() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewLogin() {
-    SirasaTheme {
-        LoginScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewLogin() {
+//    SirasaTheme {
+//        LoginScreen()
+//    }
+//}

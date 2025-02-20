@@ -24,7 +24,9 @@ import com.dev.sirasa.screens.user.history.UserHistoryScreen
 import com.dev.sirasa.screens.user.home.UserHomeScreen
 import com.dev.sirasa.screens.user.room.UserRoomScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
