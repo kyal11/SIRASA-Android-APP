@@ -70,20 +70,22 @@ kapt {
     correctErrorTypes = true
 }
 dependencies {
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
 
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation("androidx.datastore:datastore-preferences:1.1.2")
+    implementation(libs.androidx.datastore.preferences)
     
     implementation("com.google.zxing:core:3.5.1")
-    implementation("androidx.navigation:navigation-compose:2.8.7")
-    implementation("com.airbnb.android:lottie-compose:6.6.2")
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.7")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.lottie.compose)
+    implementation(libs.androidx.ui.text.google.fonts)
+
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

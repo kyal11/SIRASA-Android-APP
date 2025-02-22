@@ -27,16 +27,15 @@ import com.dev.sirasa.ui.theme.Typography
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+//    viewModel: LoginViewModel = hiltViewModel()
 ) {
-    val loginState by viewModel.loginState.collectAsState()
+//    val loginState by viewModel.loginState.collectAsState()
     var selectedOption by remember { mutableIntStateOf(0) }
     val listOption = listOf("Email", "NIM")
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var nim by remember { mutableStateOf("") }
-
     var emailError by remember { mutableStateOf("") }
     var nimError by remember { mutableStateOf("") }
     fun validateEmail(input: String) {
@@ -58,155 +57,172 @@ fun LoginScreen(
             ""
         }
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.perpus_logo),
-            contentDescription = "Logo Sirasa",
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(80.dp)
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Welcome Message
-        Text(text = "Selamat Datang", style = Typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Masuklah ke akun Anda untuk melanjutkan.", style = Typography.displayMedium)
-        Spacer(modifier = Modifier.height(32.dp))
-
-        TabRow(
-            selectedTabIndex = selectedOption,
-            modifier = Modifier
-                .height(36.dp)
-                .padding(vertical = 4.dp, horizontal = 8.dp)
-                .clip(RoundedCornerShape(16))
-                .border(1.dp, Color(0xFFE2E8F0)),
-            indicator = { tabPositions ->
-                Box(
-                    Modifier
-                        .tabIndicatorOffset(tabPositions[selectedOption])
-                        .height(4.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-            }
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding).padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            listOption.forEachIndexed { index, text ->
-                Tab(
-                    selected = selectedOption == index,
-                    onClick = {
-                        selectedOption = index
-                        emailError = ""
-                        nimError = ""
-                    },
-                    modifier = Modifier.background(
-                        if (selectedOption == index) MaterialTheme.colorScheme.primary else Color.White
-                    )
-                ) {
-                    Text(
-                        text = text,
-                        color = if (selectedOption == index) Color.White else Color.Black,
-                        modifier = Modifier.padding(8.dp)
+            Image(
+                painter = painterResource(id = R.drawable.perpus_logo),
+                contentDescription = "Logo Sirasa",
+                modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(80.dp)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Welcome Message
+            Text(text = "Selamat Datang", style = Typography.titleLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Masuklah ke akun Anda untuk melanjutkan.", style = Typography.displayMedium)
+            Spacer(modifier = Modifier.height(32.dp))
+
+            TabRow(
+                selectedTabIndex = selectedOption,
+                modifier = Modifier
+                    .height(36.dp)
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .clip(RoundedCornerShape(16))
+                    .border(1.dp, Color(0xFFE2E8F0)),
+                indicator = { tabPositions ->
+                    Box(
+                        Modifier
+                            .tabIndicatorOffset(tabPositions[selectedOption])
+                            .height(4.dp)
+                            .background(MaterialTheme.colorScheme.primary)
                     )
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Display selected option text
-        Text(
-            text = listOption[selectedOption],
-            style = Typography.bodyMedium,
-            modifier = Modifier.align(Alignment.Start).padding(bottom = 10.dp)
-        )
-
-        OutlinedTextField(
-            value = if (selectedOption == 0) email else nim,
-            onValueChange = {newValue ->
-                if (selectedOption == 0) {
-                    email = newValue
-                    validateEmail(newValue)
-                } else {
-                    if (newValue.all { it.isDigit() }) {
-                        nim = newValue
+            ) {
+                listOption.forEachIndexed { index, text ->
+                    Tab(
+                        selected = selectedOption == index,
+                        onClick = {
+                            selectedOption = index
+                            emailError = ""
+                            nimError = ""
+                        },
+                        modifier = Modifier.background(
+                            if (selectedOption == index) MaterialTheme.colorScheme.primary else Color.White
+                        )
+                    ) {
+                        Text(
+                            text = text,
+                            color = if (selectedOption == index) Color.White else Color.Black,
+                            modifier = Modifier.padding(8.dp)
+                        )
                     }
-                    validateNIM(newValue)
                 }
-            },
-            textStyle = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(Color.White, RoundedCornerShape(8.dp)),
-            placeholder = {
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display selected option text
+            Text(
+                text = listOption[selectedOption],
+                style = Typography.bodyMedium,
+                modifier = Modifier.align(Alignment.Start).padding(bottom = 10.dp)
+            )
+
+            OutlinedTextField(
+                value = if (selectedOption == 0) email else nim,
+                onValueChange = {newValue ->
+                    if (selectedOption == 0) {
+                        email = newValue
+                        validateEmail(newValue)
+                    } else {
+                        if (newValue.all { it.isDigit() }) {
+                            nim = newValue
+                        }
+                        validateNIM(newValue)
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(Color.White, RoundedCornerShape(8.dp)),
+                placeholder = {
+                    Text(
+                        text = "Masukkan ${listOption[selectedOption]} Anda",
+                        style = Typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = if (selectedOption == 0) KeyboardType.Email else KeyboardType.Number
+                ),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color(0xFFE2E8F0),
+                ),
+            )
+
+            if (selectedOption == 0 && emailError.isNotEmpty()) {
                 Text(
-                    text = "Masukkan ${listOption[selectedOption]} Anda",
+                    text = emailError,
+                    color = Color.Red,
                     style = Typography.bodyMedium,
-                    color = Color.Gray
+                    modifier = Modifier.padding(top = 4.dp).align(Alignment.Start)
                 )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = if (selectedOption == 0) KeyboardType.Email else KeyboardType.Number
-            ),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFE2E8F0),
-            ),
-        )
-
-        if (selectedOption == 0 && emailError.isNotEmpty()) {
-            Text(
-                text = emailError,
-                color = Color.Red,
-                style = Typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp).align(Alignment.Start)
-            )
-        } else if (selectedOption == 1 && nimError.isNotEmpty()) {
-            Text(
-                text = nimError,
-                color = Color.Red,
-                style = Typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp).align(Alignment.Start)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Password Input
-        PasswordField(label = "Password", value = password, onValueChange = { password = it }, passwordVisible = passwordVisible, onTogglePassword = { passwordVisible = !passwordVisible })
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Lupa Password?",
-            color = MaterialTheme.colorScheme.primary,
-            style = Typography.bodyMedium,
-            modifier = Modifier.align(Alignment.End)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Login Button
-        Button(
-            onClick = { /* TODO: Implementasi Login */ },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(text = "Masuk")
-        }
-        Spacer(modifier = Modifier.height(7.dp))
-
-        // Register Prompt
-        Row {
-            Text(text = "Belum mempunyai akun?", style = Typography.bodyMedium)
-            Spacer(modifier = Modifier.width(8.dp))
-            TextButton( onClick = {} ) {
+            } else if (selectedOption == 1 && nimError.isNotEmpty()) {
                 Text(
-                    text = "Daftar",
+                    text = nimError,
+                    color = Color.Red,
+                    style = Typography.bodyMedium,
+                    modifier = Modifier.padding(top = 4.dp).align(Alignment.Start)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Password Input
+            PasswordField(label = "Password", value = password, onValueChange = { password = it }, passwordVisible = passwordVisible, onTogglePassword = { passwordVisible = !passwordVisible })
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(
+                onClick = {
+                    navController.navigate("forget_password")
+                },
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier.height(20.dp).align(Alignment.End)
+            ) {
+                Text(
+                    text = "Lupa Password?",
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Login Button
+            Button(
+                onClick = { /* TODO: Implementasi Login */ },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = "Masuk")
+            }
+            Spacer(modifier = Modifier.height(7.dp))
+
+            // Register Prompt
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Belum mempunyai akun?", style = Typography.bodyMedium)
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(
+                    onClick = {
+                        navController.navigate("register")
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.height(20.dp).width(40.dp)
+                ) {
+                    Text(
+                        text = "Daftar",
+                        style = Typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

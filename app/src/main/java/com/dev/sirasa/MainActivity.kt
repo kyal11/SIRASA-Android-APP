@@ -10,6 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,7 +19,10 @@ import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavAdmin
 import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavItemAdmin
 import com.dev.sirasa.screens.admin.dashboard.DashboardScreen
 import com.dev.sirasa.screens.admin.data.DataScreen
+import com.dev.sirasa.screens.common.forget_password.ResetPasswordScreen
+import com.dev.sirasa.screens.common.login.LoginScreen
 import com.dev.sirasa.screens.common.profile.ProfileScreen
+import com.dev.sirasa.screens.common.register.RegisterScreen
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItemUser
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavUser
 import com.dev.sirasa.screens.user.history.UserHistoryScreen
@@ -33,22 +38,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SirasaTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background
-                    ) { innerPadding ->
-                    MainScreenAdmin()
-                }
+                AuthScreen()
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
+fun AuthScreen() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "login",
+    ) {
+        composable("login") { LoginScreen(navController) }
+        composable("register") { RegisterScreen(navController) }
+        composable("forget_password") { ResetPasswordScreen(navController)}
+    }
+
+}
+
+@Composable
+fun MainScreenUser() {
     val navController = rememberNavController()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         bottomBar = { BottomNavUser(navController) }
     ) { innerPadding ->
         NavHost(
@@ -69,6 +84,7 @@ fun MainScreenAdmin() {
     val navController = rememberNavController()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         bottomBar = { BottomNavAdmin(navController) }
     ) { innerPadding ->
         NavHost(

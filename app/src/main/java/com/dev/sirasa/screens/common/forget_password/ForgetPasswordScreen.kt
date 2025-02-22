@@ -19,13 +19,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.dev.sirasa.ui.component.InputField
 import com.dev.sirasa.ui.component.PasswordField
 import com.dev.sirasa.ui.theme.SirasaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResetPasswordScreen(onBack: () -> Unit, onEmailSent: () -> Unit) {
+fun ResetPasswordScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
 
     Scaffold(
@@ -33,7 +34,7 @@ fun ResetPasswordScreen(onBack: () -> Unit, onEmailSent: () -> Unit) {
             CenterAlignedTopAppBar(
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -63,7 +64,7 @@ fun ResetPasswordScreen(onBack: () -> Unit, onEmailSent: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { onEmailSent() },
+                onClick = {  },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -140,16 +141,16 @@ fun ChangePasswordScreen(onBack: () -> Unit, onPasswordChanged: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewResetPassword() {
-    SirasaTheme {
-        ResetPasswordScreen(
-            onBack = {},
-            onEmailSent = {}
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewResetPassword() {
+//    SirasaTheme {
+//        ResetPasswordScreen(
+//            onBack = {},
+//            onEmailSent = {}
+//        )
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable
