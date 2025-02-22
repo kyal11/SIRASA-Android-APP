@@ -1,4 +1,5 @@
 package com.dev.sirasa.screens.common.login
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dev.sirasa.R
+import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.component.PasswordField
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
@@ -27,9 +29,10 @@ import com.dev.sirasa.ui.theme.Typography
 @Composable
 fun LoginScreen(
     navController: NavController,
-//    viewModel: LoginViewModel = hiltViewModel()
+    snackbarHostState: SnackbarHostState,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
-//    val loginState by viewModel.loginState.collectAsState()
+    val loginState by viewModel.loginState.collectAsState()
     var selectedOption by remember { mutableIntStateOf(0) }
     val listOption = listOf("Email", "NIM")
     var password by remember { mutableStateOf("") }
@@ -38,6 +41,22 @@ fun LoginScreen(
     var nim by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf("") }
     var nimError by remember { mutableStateOf("") }
+
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is LoginState.Success -> {
+                navController.navigate("verified_account")
+            }
+            is LoginState.Error -> {
+                val errorMessage = (loginState as LoginState.Error).message
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    actionLabel = "OK"
+                )
+            }
+            else -> { }
+        }
+    }
     fun validateEmail(input: String) {
         emailError = if (input.isEmpty()) {
             "Email tidak boleh kosong"
@@ -57,11 +76,12 @@ fun LoginScreen(
             ""
         }
     }
-    Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+    ) {
         Column(
-            modifier = Modifier.padding(innerPadding).padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -193,17 +213,22 @@ fun LoginScreen(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-
             // Login Button
             Button(
-                onClick = { /* TODO: Implementasi Login */ },
+                onClick = {
+                    viewModel.login(
+                        email.takeIf { selectedOption == 0 },
+                        nim.takeIf { selectedOption == 1 },
+                        password
+                    )
+                },
+                enabled = (if (loginState is LoginState.Loading) false else true),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(text = "Masuk")
             }
             Spacer(modifier = Modifier.height(7.dp))
-
             // Register Prompt
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -224,6 +249,9 @@ fun LoginScreen(
                     )
                 }
             }
+        }
+        if (loginState is LoginState.Loading) {
+            LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
         }
     }
 }

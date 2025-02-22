@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,24 +29,18 @@ import com.dev.sirasa.ui.theme.SirasaTheme
 @Composable
 fun ResetPasswordScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        },
+    Column(
         modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black
+            )
+        }
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -59,12 +54,18 @@ fun ResetPasswordScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            InputField(label = "Email", placeHolder = "Masukkan Email" , value = email, onValueChange = { email = it }, keyboardType = KeyboardType.Email)
+            InputField(
+                label = "Email",
+                placeHolder = "Masukkan Email",
+                value = email,
+                onValueChange = { email = it },
+                keyboardType = KeyboardType.Email
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {  },
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {

@@ -32,7 +32,6 @@ fun VerifiedAccountScreen() {
             if (timer == 0) isButtonEnabled = true
         }
     }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,10 +67,10 @@ fun VerifiedAccountScreen() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewVerifiedAccountScreen() {
-    SirasaTheme {
-        VerifiedAccountScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewVerifiedAccountScreen() {
+//    SirasaTheme {
+//        VerifiedAccountScreen()
+//    }
+//}

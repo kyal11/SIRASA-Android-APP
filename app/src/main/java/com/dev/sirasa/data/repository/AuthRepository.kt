@@ -20,8 +20,8 @@ class AuthRepository @Inject constructor(
         emit(apiService.register(name, email, password, passwordConfirm, nim, phoneNumber))
     }
 
-    suspend fun login(email: String?, nim: String?, password: String): Flow<LoginResponse> = flow {
-        emit(apiService.login(email, nim, password))
+    suspend fun login(email: String?, nim: String?, password: String, deviceToken: String): Flow<LoginResponse> = flow {
+        emit(apiService.login(email, nim, password, deviceToken))
     }
 
     suspend fun logout(): Flow<LogoutResponse> = flow {

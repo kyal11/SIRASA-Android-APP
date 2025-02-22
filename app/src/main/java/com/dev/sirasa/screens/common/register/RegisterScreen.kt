@@ -12,15 +12,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dev.sirasa.R
 import com.dev.sirasa.ui.component.InputField
+import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 import com.dev.sirasa.ui.component.PasswordField
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(
+    navController: NavController,
+    snackbarHostState: SnackbarHostState,
+    viewModel: RegisterViewModel = hiltViewModel(),
+) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -29,15 +35,29 @@ fun RegisterScreen(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordConfirm by remember { mutableStateOf("") }
     var passwordConfirmVisible by remember { mutableStateOf(false) }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
+    val registerState by viewModel.registerState.collectAsState()
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is RegisterState.Success -> {
+                snackbarHostState.showSnackbar("Registrasi berhasil! Silakan login.")
+                navController.navigate("login")
+            }
+            is RegisterState.Error -> {
+                val errorMessage = (registerState as RegisterState.Error).message
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    actionLabel = "OK"
+                )
+            }
+            else -> {}
+        }
+    }
+    Box (
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+    ){
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -68,7 +88,9 @@ fun RegisterScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { /* TODO: Implementasi Register */ },
+                onClick = {
+                    viewModel.register(name, email, password, passwordConfirm, nim, phoneNumber)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -94,21 +116,11 @@ fun RegisterScreen(navController: NavController) {
                     )
                 }
             }
-//        Row() {
-//            Text(
-//                text = "Sudah Mempunyai Akun?",
-//                style= Typography.bodyMedium
-//            )
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Text(
-//                text = "Masuk di sini",
-//                color = MaterialTheme.colorScheme.primary,
-//                style = Typography.bodyMedium
-//            )
-//        }
+        }
+        if (registerState is RegisterState.Loading) {
+            LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
         }
     }
-
 }
 
 //@Preview(showBackground = true)

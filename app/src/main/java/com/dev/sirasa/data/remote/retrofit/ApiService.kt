@@ -25,7 +25,8 @@ interface ApiService {
     suspend fun login(
         @Field("email") email: String?,
         @Field("nim") nim:String?,
-        @Field("password") password: String
+        @Field("password") password: String,
+        @Field("deviceToken") deviceToken: String,
     ) : LoginResponse
 
     @POST("logout")
