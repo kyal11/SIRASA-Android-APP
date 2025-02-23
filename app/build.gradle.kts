@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.compose.compiler)
+    kotlin("plugin.serialization") version "2.1.0"
+
 }
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("gradle.properties")
@@ -64,7 +67,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
 }
 kapt {
     correctErrorTypes = true
@@ -84,7 +86,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.android.jwtdecode)
 
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

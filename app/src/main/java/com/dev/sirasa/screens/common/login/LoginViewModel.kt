@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.sirasa.data.local.UserModel
 import com.dev.sirasa.data.repository.AuthRepository
+import com.dev.sirasa.utils.JwtUtils
 import com.google.firebase.messaging.FirebaseMessaging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,11 @@ class LoginViewModel @Inject constructor(
                 deviceToken?.let {
                     authRepository.login(email, nim, password, it).collect { response ->
                         if (response.status == "success") {
+                            val token = response.data?.token ?: ""
+                            Log.d("token verified: ", "${token}")
+                            val isVerified = JwtUtils.isVerified(token) ?: false
+                            val role = JwtUtils.getRole(token) ?: false
+
                             val userModel = UserModel(
                                 name = response.data?.name ?: "",
                                 email = response.data?.email ?: "",
@@ -38,7 +44,15 @@ class LoginViewModel @Inject constructor(
                                 token = response.data?.token ?: ""
                             )
                             authRepository.saveSession(userModel)
-                            _loginState.value = LoginState.Success
+                            Log.d("verified: ", "${isVerified}")
+                            val destination = when {
+                                role in listOf("superadmin", "admin") -> "main_screen_admin"
+                                !isVerified -> "verified_account"
+                                else -> "main_screen_user"
+                            }
+
+                            _loginState.value = LoginState.Success(destination)
+
                         } else {
                             _loginState.value = LoginState.Error(response.message ?: "Login gagal")
                         }

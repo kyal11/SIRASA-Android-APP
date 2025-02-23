@@ -45,7 +45,9 @@ fun LoginScreen(
     LaunchedEffect(loginState) {
         when (loginState) {
             is LoginState.Success -> {
-                navController.navigate("verified_account")
+                navController.navigate((loginState as LoginState.Success).destination) {
+                    popUpTo("login") { inclusive = true }
+                }
             }
             is LoginState.Error -> {
                 val errorMessage = (loginState as LoginState.Error).message

@@ -2,6 +2,8 @@ package com.dev.sirasa.data.repository
 
 import com.dev.sirasa.data.local.UserModel
 import com.dev.sirasa.data.local.UserPreference
+import com.dev.sirasa.data.remote.response.auth.EmailResetPasswordResponse
+import com.dev.sirasa.data.remote.response.auth.EmailVerifiedResponse
 import com.dev.sirasa.data.remote.response.auth.LoginResponse
 import com.dev.sirasa.data.remote.response.auth.LogoutResponse
 import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
@@ -40,5 +42,20 @@ class AuthRepository @Inject constructor(
 
     suspend fun clearSession() {
         userPreference.clearSession()
+    }
+    suspend fun sendEmailPassword(email: String): Flow<EmailResetPasswordResponse> = flow {
+        emit(apiService.sendEmailPassword(email))
+    }
+
+    suspend fun resetPassword(
+        token: String,
+        password: String,
+        passwordConfirm: String
+    ): Flow<EmailResetPasswordResponse> = flow {
+        emit(apiService.resetPassword(token, password, passwordConfirm))
+    }
+
+    suspend fun sendEmailVerified(email: String): Flow<EmailVerifiedResponse> = flow {
+        emit(apiService.sendEmailVerified(email))
     }
 }

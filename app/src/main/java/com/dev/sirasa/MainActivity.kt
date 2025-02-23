@@ -1,6 +1,7 @@
 package com.dev.sirasa
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,29 +14,28 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
+import androidx.navigation.navDeepLink
 import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavAdmin
 import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavItemAdmin
 import com.dev.sirasa.screens.admin.dashboard.DashboardScreen
 import com.dev.sirasa.screens.admin.data.DataScreen
 import com.dev.sirasa.screens.common.email_verification.VerifiedAccountScreen
+import com.dev.sirasa.screens.common.forget_password.ChangePasswordScreen
 import com.dev.sirasa.screens.common.forget_password.ResetPasswordScreen
 import com.dev.sirasa.screens.common.login.LoginScreen
-import com.dev.sirasa.screens.common.login.LoginViewModel
 import com.dev.sirasa.screens.common.profile.ProfileScreen
 import com.dev.sirasa.screens.common.register.RegisterScreen
 import com.dev.sirasa.screens.user.bottom_nav_bar.BottomNavItemUser
@@ -45,6 +45,18 @@ import com.dev.sirasa.screens.user.home.UserHomeScreen
 import com.dev.sirasa.screens.user.room.UserRoomScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
 import dagger.hilt.android.AndroidEntryPoint
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.toRoute
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -52,6 +64,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val viewModel: MainViewModel by viewModels()
         requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 Log.d("Permission", "Notification permission granted.")
@@ -73,21 +86,71 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
+            val authState by viewModel.authState.collectAsState()
             SirasaTheme {
-                AuthScreen()
+                when (authState) {
+                    is AuthState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    is AuthState.Unauthorized -> {
+                        AuthScreen()
+                    }
+
+                    is AuthState.Authorized -> {
+                        val route = (authState as AuthState.Authorized).route
+                        val navController = rememberNavController()
+                        LaunchedEffect(Unit) {
+                            navController.navigate(route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                        Scaffold { innerPadding ->
+                            NavHost(
+                                navController = navController, startDestination = route,
+                                modifier = Modifier.padding(innerPadding)
+                            ) {
+                                composable("main_screen_user") { MainScreenUser() }
+                                composable("main_screen_admin") { MainScreenAdmin() }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
+@Serializable
+data class ResetPasswordRoute(val token: String)
+val uri = "https://sirasa.teamteaguard.com/reset-password"
+
 @Composable
 fun AuthScreen() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+    val context = LocalContext.current
+    val intent = (context as? Activity)?.intent
+
+    LaunchedEffect(intent?.data) {
+        intent?.data?.let { uri ->
+            Log.d("DeepLink", "Received deep link: $uri")
+
+            val token = uri.getQueryParameter("token")
+            if (!token.isNullOrEmpty()) {
+                navController.navigate("reset_password?token=$token") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
         }
+    }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -100,12 +163,25 @@ fun AuthScreen() {
             ) {
                 composable("login") { LoginScreen(navController, snackbarHostState) }
                 composable("register") { RegisterScreen(navController, snackbarHostState) }
-                composable("forget_password") { ResetPasswordScreen(navController) }
-                composable("verified_account") { VerifiedAccountScreen() }
+                composable("forget_password") { ResetPasswordScreen(navController,snackbarHostState) }
+                composable("verified_account") { VerifiedAccountScreen(snackbarHostState) }
+                composable(
+                    route = "reset_password?token={token}",
+                    deepLinks = listOf(
+                        navDeepLink { uriPattern = "$uri?token={token}" }
+                    )
+                ) { backStackEntry ->
+                    val token = backStackEntry.arguments?.getString("token") ?: ""
+                    ChangePasswordScreen(token = token, navController, snackbarHostState)
+                }
+                composable("main_screen_user") { MainScreenUser() }
+                composable("main_screen_admin") { MainScreenAdmin() }
             }
         }
     }
 }
+
+
 
 
 @Composable
@@ -119,7 +195,7 @@ fun MainScreenUser() {
         NavHost(
             navController = navController,
             startDestination = BottomNavItemUser.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.consumeWindowInsets(innerPadding)
         ) {
             composable(BottomNavItemUser.Home.route) { UserHomeScreen() }
             composable(BottomNavItemUser.Room.route) { UserRoomScreen() }
@@ -140,7 +216,7 @@ fun MainScreenAdmin() {
         NavHost(
             navController = navController,
             startDestination = BottomNavItemAdmin.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.consumeWindowInsets(innerPadding)
         ) {
             composable(BottomNavItemAdmin.Home.route) { DashboardScreen() }
             composable(BottomNavItemAdmin.Room.route) { UserRoomScreen() }
