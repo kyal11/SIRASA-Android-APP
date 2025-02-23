@@ -54,9 +54,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.toRoute
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -131,19 +134,26 @@ data class ResetPasswordRoute(val token: String)
 val uri = "https://sirasa.teamteaguard.com/reset-password"
 
 @Composable
-fun AuthScreen() {
+fun AuthScreen(viewModel: MainViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
-
+    val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(intent?.data) {
         intent?.data?.let { uri ->
             Log.d("DeepLink", "Received deep link: $uri")
 
-            val token = uri.getQueryParameter("token")
-            if (!token.isNullOrEmpty()) {
-                navController.navigate("reset_password?token=$token") {
+            val resetToken = uri.getQueryParameter("token")
+            val isEmailValidation = uri.toString().contains("validate-email")
+            if (resetToken != null && isEmailValidation) {
+                viewModel.validateEmail(resetToken) {
+                    navController.navigate("main_screen_user") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            } else if (resetToken != null) {
+                navController.navigate("reset_password?token=$resetToken") {
                     popUpTo("login") { inclusive = true }
                 }
             }
@@ -180,9 +190,6 @@ fun AuthScreen() {
         }
     }
 }
-
-
-
 
 @Composable
 fun MainScreenUser() {

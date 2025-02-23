@@ -8,6 +8,7 @@ import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -57,4 +58,7 @@ interface ApiService {
     suspend fun sendEmailVerified(
         @Field("email") email: String
     ) : EmailVerifiedResponse
+
+    @GET("validate-email")
+    suspend fun validateEmail(@Query("token") token: String): EmailVerifiedResponse
 }

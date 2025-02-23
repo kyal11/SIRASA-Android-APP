@@ -41,7 +41,7 @@ class LoginViewModel @Inject constructor(
                                 name = response.data?.name ?: "",
                                 email = response.data?.email ?: "",
                                 nim = response.data?.nim ?: "",
-                                token = response.data?.token ?: ""
+                                token = token
                             )
                             authRepository.saveSession(userModel)
                             Log.d("verified: ", "${isVerified}")

@@ -58,4 +58,8 @@ class AuthRepository @Inject constructor(
     suspend fun sendEmailVerified(email: String): Flow<EmailVerifiedResponse> = flow {
         emit(apiService.sendEmailVerified(email))
     }
+
+    suspend fun ValidateEmail(token: String): Flow<EmailVerifiedResponse> = flow {
+        emit(apiService.validateEmail(token))
+    }
 }
