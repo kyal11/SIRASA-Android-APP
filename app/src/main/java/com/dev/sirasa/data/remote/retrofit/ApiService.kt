@@ -6,13 +6,22 @@ import com.dev.sirasa.data.remote.response.auth.LoginResponse
 import com.dev.sirasa.data.remote.response.auth.LogoutResponse
 import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
+import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
+import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
+import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
+import com.dev.sirasa.data.remote.response.room.RoomResponse
+import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
+
+    // AUTH
     @FormUrlEncoded
     @POST("register")
     suspend fun register(
@@ -61,4 +70,26 @@ interface ApiService {
 
     @GET("validate-email")
     suspend fun validateEmail(@Query("token") token: String): EmailVerifiedResponse
+
+
+    // Room & Slot
+    @GET("rooms")
+    suspend fun getAllRoom() : RoomResponse
+
+    @GET("rooms/{id}")
+    suspend fun getRoomDetail(
+        @Path("id") id: String,
+        @Query("day") day: String
+    ): RoomDetailResponse
+
+    @GET("rooms/slots")
+    suspend fun getRoomWithSlots(
+        @Query("day") day: String
+    ): RoomWithSlotResponse
+
+    // Booking
+    @POST("bookings")
+    suspend fun createBooking(
+        @Body request: CreateBookingRequest
+    ): CreateBookingResponse
 }

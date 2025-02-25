@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,7 +46,7 @@ fun UserHomeScreen() {
     var selectedSlots by remember { mutableStateOf<List<String>>(emptyList()) }
     var capacity by remember { mutableStateOf("") }
     Column (
-        modifier = Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 24.dp),
+        modifier = Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 24.dp).navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(

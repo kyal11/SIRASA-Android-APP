@@ -38,7 +38,7 @@ fun CustomOptionTime(
                 else selectedItems.sortedBy { options.indexOf(it) }.joinToString(", "),
             onValueChange = {},
             readOnly = true,
-            textStyle = MaterialTheme.typography.bodyMedium,
+            textStyle = MaterialTheme.typography.bodyMedium.copy(Color.Black),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -52,6 +52,7 @@ fun CustomOptionTime(
                 unfocusedBorderColor = Color(0xFFE2E8F0),
             ),
             shape = RoundedCornerShape(8.dp),
+            maxLines = 2
         )
 
         if (expanded) {

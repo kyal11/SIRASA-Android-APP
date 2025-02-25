@@ -48,7 +48,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
@@ -123,6 +125,8 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+
+                    else -> {}
                 }
             }
         }
@@ -175,6 +179,8 @@ fun AuthScreen(viewModel: MainViewModel = hiltViewModel()) {
                 composable("register") { RegisterScreen(navController, snackbarHostState) }
                 composable("forget_password") { ResetPasswordScreen(navController,snackbarHostState) }
                 composable("verified_account") { VerifiedAccountScreen(snackbarHostState) }
+                composable("main_screen_user") { MainScreenUser() }
+                composable("main_screen_admin") { MainScreenAdmin() }
                 composable(
                     route = "reset_password?token={token}",
                     deepLinks = listOf(
@@ -184,8 +190,6 @@ fun AuthScreen(viewModel: MainViewModel = hiltViewModel()) {
                     val token = backStackEntry.arguments?.getString("token") ?: ""
                     ChangePasswordScreen(token = token, navController, snackbarHostState)
                 }
-                composable("main_screen_user") { MainScreenUser() }
-                composable("main_screen_admin") { MainScreenAdmin() }
             }
         }
     }
@@ -204,10 +208,34 @@ fun MainScreenUser() {
             startDestination = BottomNavItemUser.Home.route,
             modifier = Modifier.consumeWindowInsets(innerPadding)
         ) {
-            composable(BottomNavItemUser.Home.route) { UserHomeScreen() }
-            composable(BottomNavItemUser.Room.route) { UserRoomScreen() }
-            composable(BottomNavItemUser.History.route) { UserHistoryScreen() }
-            composable(BottomNavItemUser.Profile.route) { ProfileScreen() }
+            composable(BottomNavItemUser.Home.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    UserHomeScreen()
+                }
+            }
+            composable(BottomNavItemUser.Room.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    UserRoomScreen()
+                }
+            }
+            composable(BottomNavItemUser.History.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    UserHistoryScreen()
+                }
+            }
+            composable(BottomNavItemUser.Profile.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    ProfileScreen()
+                }
+            }
         }
     }
 }

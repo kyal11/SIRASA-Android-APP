@@ -66,7 +66,7 @@ fun DropdownField(
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth().background(Color.White),
+                modifier = Modifier.background(Color.White),
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
