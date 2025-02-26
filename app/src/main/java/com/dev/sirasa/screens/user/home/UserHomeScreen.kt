@@ -46,7 +46,7 @@ fun UserHomeScreen() {
     var selectedSlots by remember { mutableStateOf<List<String>>(emptyList()) }
     var capacity by remember { mutableStateOf("") }
     Column (
-        modifier = Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 24.dp).navigationBarsPadding(),
+        modifier = Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 16.dp).navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -54,7 +54,7 @@ fun UserHomeScreen() {
             contentDescription = "Logo Sirasa",
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(80.dp)
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Selamat Datang di SIRASA",
             style = Typography.displayLarge
@@ -65,16 +65,16 @@ fun UserHomeScreen() {
             style = Typography.displayMedium,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         DateField()
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         DropdownField(
             options = listOf("Ruangan 1", "Ruangan 2", "Ruangan 3"),
             selectedOption = roomOption,
             onOptionSelected = { roomOption = it }
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row (
             modifier = Modifier.fillMaxWidth(),
@@ -104,7 +104,7 @@ fun UserHomeScreen() {
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         InputFieldTextArea("Keterangan Keperluan", description, {description = it}, KeyboardType.Text)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -116,7 +116,7 @@ fun UserHomeScreen() {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = { /* TODO: Implementasi Register */ },
             modifier = Modifier.fillMaxWidth().height(48.dp),

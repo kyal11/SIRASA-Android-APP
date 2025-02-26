@@ -38,14 +38,15 @@ fun CustomOptionTime(
                 else selectedItems.sortedBy { options.indexOf(it) }.joinToString(", "),
             onValueChange = {},
             readOnly = true,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(Color.Black),
+            textStyle = if (selectedItems.isEmpty())  MaterialTheme.typography.bodyMedium
+                else MaterialTheme.typography.bodyMedium.copy(Color.Black),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .clickable { expanded = true }
                 .background(Color.White, RoundedCornerShape(8.dp)),
             placeholder = {
-                Text("Pilih Slot Waktu", color = Color.Gray, style = Typography.bodyMedium)
+                Text("Pilih Slot Waktu", style = Typography.bodyMedium, color = Color.Gray)
             },
             enabled = false,
             colors = OutlinedTextFieldDefaults.colors(

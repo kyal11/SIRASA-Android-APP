@@ -94,7 +94,23 @@ fun DatePickerModal(
             }
         }
     )
-
+    val customColors = DatePickerDefaults.colors(
+        // Warna container keseluruhan
+        containerColor = Color(0xFFF0F8FF),
+        // Warna untuk hari yang dipilih
+        selectedDayContainerColor = Color(0xFF00AA00),  // Hijau untuk hari yang dipilih
+        selectedDayContentColor = Color.White,
+        // Warna untuk hari ini
+        todayContentColor = Color(0xFF0000FF),  // Biru untuk hari ini
+        todayDateBorderColor = Color(0xFF0000FF),
+        // Warna untuk header dan konten lainnya
+        titleContentColor = Color(0xFF000000),
+        headlineContentColor = Color(0xFF000000),
+        weekdayContentColor = Color(0xFF505050),
+        // Warna untuk tahun yang dipilih
+        selectedYearContainerColor = Color(0xFF00AA00),
+        selectedYearContentColor = Color.White
+    )
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -110,9 +126,7 @@ fun DatePickerModal(
                 Text("Cancel")
             }
         },
-        colors = DatePickerDefaults.colors(
-            containerColor = Color.White
-        )
+        colors = customColors,
     ) {
         DatePicker(state = datePickerState)
     }

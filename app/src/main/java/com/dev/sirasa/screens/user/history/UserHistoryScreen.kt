@@ -210,7 +210,10 @@ fun CardHistory(
     Card(
         modifier = Modifier.padding(8.dp).fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Row(
