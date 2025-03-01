@@ -29,6 +29,8 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -40,14 +42,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.dev.sirasa.screens.user.home.BookingState
+import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.Green900
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun UserRoomScreen() {
-    var selectedOption by remember { mutableIntStateOf(0) }
+fun UserRoomScreen(viewModel: RoomViewModel = hiltViewModel()) {
+    val roomsState by viewModel.roomsSlotsState.collectAsState()
+    val roomsList by viewModel.roomSlots.collectAsState()
+    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    val days = remember {
+        generateNextDays(3)
+    }
+    val initialIndex = days.indexOfFirst { day ->
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(day) == today
+    }.coerceAtLeast(0)
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    LaunchedEffect(selectedTabIndex) {
+        // Format the date as needed by API (YYYY-MM-DD)
+        val dayValue = (selectedTabIndex + 1).toString()
+        viewModel.getAllRoomsSlots(dayValue)
+    }
     val timeSlots = listOf(
         "08.00" to false,
         "09.00" to false,
@@ -60,28 +83,48 @@ fun UserRoomScreen() {
         "17.00" to false,
         "18.00" to false
     )
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp).padding(
-                WindowInsets.navigationBars.asPaddingValues()),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Informasi Ruangan",
-            style = Typography.displayLarge
-        )
-        TabDayRoom(
-            selectedOption = selectedOption,
-            onOptionSelected = { selectedOption = it }
-        )
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            item {
-                CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
-                CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
-                CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 16.dp).padding(
+                    WindowInsets.navigationBars.asPaddingValues()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Informasi Ruangan",
+                style = Typography.displayLarge
+            )
+            TabDayRoom(
+                selectedOption = selectedTabIndex,
+                onOptionSelected = { selectedTabIndex = it },
+                listOption = days.map {
+                    SimpleDateFormat("dd MMM", Locale("id")).format(it)
+                }
+            )
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
+                    CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
+                    CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
+                }
             }
         }
+        if (roomsState is RoomsSlotsState.Loading) {
+            LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}
+fun generateNextDays(count: Int): List<Date> {
+    val calendar = Calendar.getInstance()
+    return List(count) { index ->
+        if (index > 0) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        calendar.time.clone() as Date
     }
 }
 @OptIn(ExperimentalLayoutApi::class)

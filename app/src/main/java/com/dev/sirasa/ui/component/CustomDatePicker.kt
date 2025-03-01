@@ -27,9 +27,10 @@ import java.util.Locale
 
 @Composable
 fun DateField(
-    modifier: Modifier = Modifier
+    onDateSelected: (String) -> Unit,
 ) {
     var selectedDate by remember { mutableStateOf<Long?>(null) }
+    var selectedDayCode by remember { mutableStateOf<String?>(null) }
     var showModal by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -50,7 +51,7 @@ fun DateField(
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color(0xFFE2E8F0),
             ),
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .background(Color.White, RoundedCornerShape(8.dp))
@@ -67,8 +68,10 @@ fun DateField(
     }
     if (showModal) {
         DatePickerModal(
-            onDateSelected = {
-                selectedDate = it
+            onDateSelected = { dateMillis ->
+                selectedDate = dateMillis
+                selectedDayCode = dateMillis?.let { convertMillisToDayCode(it) }
+                selectedDayCode?.let { onDateSelected(it) }
             },
             onDismiss = {
                 showModal = false
@@ -136,6 +139,18 @@ fun convertMillisToDate(millis: Long): String {
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     return formatter.format(Date(millis))
 }
+fun convertMillisToDayCode(millis: Long): String {
+    val todayUtc = getUtcMillisForDayOffset(0)
+    val tomorrowUtc = getUtcMillisForDayOffset(1)
+    val dayAfterTomorrowUtc = getUtcMillisForDayOffset(2)
+
+    return when (millis) {
+        todayUtc -> "1"
+        tomorrowUtc -> "2"
+        dayAfterTomorrowUtc -> "3"
+        else -> "unknown"
+    }
+}
 fun getUtcMillisForDayOffset(offset: Int): Long {
     val calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
     calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
@@ -145,10 +160,10 @@ fun getUtcMillisForDayOffset(offset: Int): Long {
     calendar.add(java.util.Calendar.DAY_OF_MONTH, offset) // Geser hari
     return calendar.timeInMillis
 }
-@Preview(showBackground = true)
-@Composable
-fun PreviewDateField() {
-    SirasaTheme {
-        DateField()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewDateField() {
+//    SirasaTheme {
+//        DateField()
+//    }
+//}

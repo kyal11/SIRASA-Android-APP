@@ -20,7 +20,7 @@ data class DataRoom(
 	val createdAt: String? = null,
 
 	@field:SerializedName("name")
-	val name: String? = null,
+	val name: String,
 
 	@field:SerializedName("startTime")
 	val startTime: String? = null,

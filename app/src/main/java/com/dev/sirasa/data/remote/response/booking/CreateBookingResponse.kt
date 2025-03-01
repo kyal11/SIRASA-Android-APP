@@ -92,5 +92,6 @@ data class DataBooking(
 data class CreateBookingRequest(
 	val roomId: String,
 	val bookingSlotId: List<String>,
-	val participant: Int
+	val participant: Int,
+	val description: String?
 )

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class RoomDetailResponse(
 
 	@field:SerializedName("data")
-	val data: DataRoom? = null,
+	val data: DataRoomDetail? = null,
 
 	@field:SerializedName("message")
 	val message: String? = null,
@@ -44,10 +44,10 @@ data class SlotsDetailItem(
 	val date: String? = null,
 
 	@field:SerializedName("startTime")
-	val startTime: String? = null,
+	val startTime: String,
 
 	@field:SerializedName("isBooked")
-	val isBooked: Boolean? = null,
+	val isBooked: Boolean,
 
 	@field:SerializedName("id")
 	val id: String? = null,

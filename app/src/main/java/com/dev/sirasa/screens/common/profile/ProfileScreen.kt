@@ -1,5 +1,6 @@
 package com.dev.sirasa.screens.common.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,19 +18,41 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.dev.sirasa.MainViewModel
 import com.dev.sirasa.R
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    navController: NavController,
+    snackbarHostState: SnackbarHostState ,
+    viewModel: ProfileViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var editingField by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("John Doe") }
     var phoneNumber by remember { mutableStateOf("+62 812 3456 7890") }
     var password by remember { mutableStateOf("********") }
+    val profileState by viewModel.profileState.collectAsState()
 
+    LaunchedEffect(profileState) {
+        Log.d("Logout", "Current profileState: $profileState")
+        when (profileState) {
+            is ProfileState.Success -> {
+                mainViewModel.checkUserSession()
+            }
+            is ProfileState.Error -> {
+                val errorMessage = (profileState as ProfileState.Error).message
+                snackbarHostState.showSnackbar(message = errorMessage, actionLabel = "OK")
+            }
+            else -> {}
+        }
+    }
     Column(
         modifier = Modifier.fillMaxSize().padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -105,7 +128,10 @@ fun ProfileScreen() {
             text = { Text("Are you sure you want to logout?") },
             containerColor = Color.White,
             confirmButton = {
-                TextButton(onClick = { showLogoutDialog = false /* Handle Logout */ }) {
+                TextButton(onClick = {
+                    showLogoutDialog = false
+                    viewModel.logout()
+                }) {
                     Text("Yes")
                 }
             },
@@ -161,10 +187,10 @@ fun EditProfileDialog(field: String, currentValue: String, onDismiss: () -> Unit
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfile() {
-    SirasaTheme {
-        ProfileScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewProfile() {
+//    SirasaTheme {
+//        ProfileScreen()
+//    }
+//}

@@ -27,6 +27,7 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun logout(): Flow<LogoutResponse> = flow {
+        userPreference.clearSession()
         emit(apiService.logout())
     }
 
@@ -40,9 +41,6 @@ class AuthRepository @Inject constructor(
 
     fun getSession(): Flow<UserModel> = userPreference.getSession()
 
-    suspend fun clearSession() {
-        userPreference.clearSession()
-    }
     suspend fun sendEmailPassword(email: String): Flow<EmailResetPasswordResponse> = flow {
         emit(apiService.sendEmailPassword(email))
     }

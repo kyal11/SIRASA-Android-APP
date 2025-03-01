@@ -92,6 +92,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             val authState by viewModel.authState.collectAsState()
+            val snackbarHostState = remember { SnackbarHostState() }
             SirasaTheme {
                 when (authState) {
                     is AuthState.Loading -> {
@@ -104,7 +105,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     is AuthState.Unauthorized -> {
-                        AuthScreen()
+                        AuthScreen(snackbarHostState)
                     }
 
                     is AuthState.Authorized -> {
@@ -120,8 +121,8 @@ class MainActivity : ComponentActivity() {
                                 navController = navController, startDestination = route,
                                 modifier = Modifier.padding(innerPadding)
                             ) {
-                                composable("main_screen_user") { MainScreenUser() }
-                                composable("main_screen_admin") { MainScreenAdmin() }
+                                composable("main_screen_user") { MainScreenUser(snackbarHostState) }
+                                composable("main_screen_admin") { MainScreenAdmin(snackbarHostState) }
                             }
                         }
                     }
@@ -138,9 +139,8 @@ data class ResetPasswordRoute(val token: String)
 val uri = "https://sirasa.teamteaguard.com/reset-password"
 
 @Composable
-fun AuthScreen(viewModel: MainViewModel = hiltViewModel()) {
+fun AuthScreen(snackbarHostState: SnackbarHostState, viewModel: MainViewModel = hiltViewModel()) {
     val navController = rememberNavController()
-    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
     val coroutineScope = rememberCoroutineScope()
@@ -179,8 +179,8 @@ fun AuthScreen(viewModel: MainViewModel = hiltViewModel()) {
                 composable("register") { RegisterScreen(navController, snackbarHostState) }
                 composable("forget_password") { ResetPasswordScreen(navController,snackbarHostState) }
                 composable("verified_account") { VerifiedAccountScreen(snackbarHostState) }
-                composable("main_screen_user") { MainScreenUser() }
-                composable("main_screen_admin") { MainScreenAdmin() }
+                composable("main_screen_user") { MainScreenUser(snackbarHostState) }
+                composable("main_screen_admin") { MainScreenAdmin(snackbarHostState) }
                 composable(
                     route = "reset_password?token={token}",
                     deepLinks = listOf(
@@ -196,7 +196,7 @@ fun AuthScreen(viewModel: MainViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun MainScreenUser() {
+fun MainScreenUser(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -212,7 +212,7 @@ fun MainScreenUser() {
                 Box(
                     modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
                 ) {
-                    UserHomeScreen()
+                    UserHomeScreen(snackbarHostState)
                 }
             }
             composable(BottomNavItemUser.Room.route) {
@@ -233,15 +233,16 @@ fun MainScreenUser() {
                 Box(
                     modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
                 ) {
-                    ProfileScreen()
+                    ProfileScreen(navController, snackbarHostState)
                 }
             }
+            composable("auth_screen") { AuthScreen(snackbarHostState) }
         }
     }
 }
 
 @Composable
-fun MainScreenAdmin() {
+fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -253,10 +254,37 @@ fun MainScreenAdmin() {
             startDestination = BottomNavItemAdmin.Home.route,
             modifier = Modifier.consumeWindowInsets(innerPadding)
         ) {
-            composable(BottomNavItemAdmin.Home.route) { DashboardScreen() }
-            composable(BottomNavItemAdmin.Room.route) { UserRoomScreen() }
-            composable(BottomNavItemAdmin.Data.route) { DataScreen() }
-            composable(BottomNavItemAdmin.Profile.route) { ProfileScreen() }
+            composable(BottomNavItemAdmin.Home.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    DashboardScreen()
+                }
+            }
+            composable(BottomNavItemAdmin.Room.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    UserRoomScreen()
+                }
+            }
+            composable(BottomNavItemAdmin.Data.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    DataScreen()
+                }
+            }
+            composable(BottomNavItemAdmin.Profile.route) {
+                composable(BottomNavItemUser.Profile.route) {
+                    Box(
+                        modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                    ) {
+                        ProfileScreen(navController, snackbarHostState)
+                    }
+                }
+            }
+            composable("auth_screen") { AuthScreen(snackbarHostState) }
         }
     }
 }
