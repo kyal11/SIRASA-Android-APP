@@ -8,6 +8,7 @@ import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
+import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
@@ -16,6 +17,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -92,4 +94,20 @@ interface ApiService {
     suspend fun createBooking(
         @Body request: CreateBookingRequest
     ): CreateBookingResponse
+
+    @GET("bookings/history")
+    suspend fun getBookingHistory() : BookingUserResponse
+
+    @GET("bookings/history/active")
+    suspend fun getBookingActive() : BookingUserResponse
+
+    @PUT("bookings/{id}/cancel")
+    suspend fun cancelBooking(
+        @Path("id") id: String
+    ) : BookingUserResponse
+
+    @PUT("bookings/{id}/done")
+    suspend fun validationBooking(
+        @Path("id") id: String
+    ) : BookingUserResponse
 }

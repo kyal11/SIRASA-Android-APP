@@ -53,36 +53,21 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun UserRoomScreen(viewModel: RoomViewModel = hiltViewModel()) {
     val roomsState by viewModel.roomsSlotsState.collectAsState()
     val roomsList by viewModel.roomSlots.collectAsState()
-    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     val days = remember {
         generateNextDays(3)
     }
-    val initialIndex = days.indexOfFirst { day ->
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(day) == today
-    }.coerceAtLeast(0)
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(selectedTabIndex) {
         // Format the date as needed by API (YYYY-MM-DD)
         val dayValue = (selectedTabIndex + 1).toString()
         viewModel.getAllRoomsSlots(dayValue)
     }
-    val timeSlots = listOf(
-        "08.00" to false,
-        "09.00" to false,
-        "10.00" to true,
-        "11.00" to false,
-        "13.00" to false,
-        "14.00" to true,
-        "15.00" to false,
-        "16.00" to false,
-        "17.00" to false,
-        "18.00" to false
-    )
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -90,8 +75,10 @@ fun UserRoomScreen(viewModel: RoomViewModel = hiltViewModel()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 16.dp).padding(
-                    WindowInsets.navigationBars.asPaddingValues()),
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(
+                    WindowInsets.navigationBars.asPaddingValues()
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -106,10 +93,21 @@ fun UserRoomScreen(viewModel: RoomViewModel = hiltViewModel()) {
                 }
             )
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                item {
-                    CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
-                    CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
-                    CardRoom("Ruang Merpati", "2", "5", "27 Desember 2025", timeSlots)
+                items(
+                    roomsList.size,
+                    key = { index -> roomsList[index]?.id ?: "" }
+                ) { index ->
+                    roomsList[index]?.let { room ->
+                        CardRoom(
+                            roomName = room.name,
+                            floorName = room.floor.toString(),
+                            capacitu = room.capacity.toString(),
+                            dateRoom = formatISODateToIndonesian(room.slots.firstOrNull()?.date),
+                            timeSlots = room.slots.map { slot ->
+                                Pair(slot.startTime, slot.isBooked)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -127,11 +125,27 @@ fun generateNextDays(count: Int): List<Date> {
         calendar.time.clone() as Date
     }
 }
+fun formatISODateToIndonesian(isoDateString: String?): String {
+    if (isoDateString.isNullOrEmpty()) return ""
+
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+        val date = inputFormat.parse(isoDateString)
+
+        val outputFormat = SimpleDateFormat("d MMMM yyyy", Locale("id", "ID"))
+        outputFormat.format(date)
+    } catch (e: Exception) {
+        isoDateString
+    }
+}
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: String,  timeSlots: List<Pair<String, Boolean>>) {
     Card (
-        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -139,7 +153,9 @@ fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: St
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ){
         Column (
-            modifier = Modifier.fillMaxWidth().padding(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
         ){
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -175,7 +191,9 @@ fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: St
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row (
@@ -183,7 +201,9 @@ fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: St
                 ){
                     Badge(
                         containerColor = Green300,
-                        modifier = Modifier.width(16.dp).height(16.dp)
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -196,7 +216,9 @@ fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: St
                 ){
                     Badge(
                         containerColor = Color.Red,
-                        modifier = Modifier.width(16.dp).height(16.dp)
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -205,9 +227,12 @@ fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: St
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(4.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalArrangement = Arrangement.Center,
+                maxItemsInEachRow = 4
             ) {
                 timeSlots.forEach { (time, isBooked) ->
                     SlotTime(time, isBooked)
@@ -220,16 +245,23 @@ fun CardRoom(roomName: String, floorName: String, capacitu: String, dateRoom: St
 
 @Composable
 fun SlotTime(time: String, isBooked: Boolean) {
-    Badge(
-        containerColor = if (isBooked) Color.Red else Green300,
-        contentColor = if (isBooked) Color.White else Color.Black,
-        modifier = Modifier.padding(8.dp)
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .size(60.dp, 36.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            time,
-            style = Typography.titleMedium,
-            modifier = Modifier.padding(8.dp)
-        )
+        Badge(
+            containerColor = if (isBooked) Color.Red else Green300,
+            contentColor = if (isBooked) Color.White else Color.Black,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                time,
+                style = Typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -259,7 +291,11 @@ fun TabDayRoom(
                         if (selectedOption == index) MaterialTheme.colorScheme.primary else Color.Transparent,
                         shape = when (index) {
                             0 -> RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp)
-                            listOption.size - 1 -> RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp)
+                            listOption.size - 1 -> RoundedCornerShape(
+                                topEnd = 50.dp,
+                                bottomEnd = 50.dp
+                            )
+
                             else -> RoundedCornerShape(0.dp)
                         }
                     )

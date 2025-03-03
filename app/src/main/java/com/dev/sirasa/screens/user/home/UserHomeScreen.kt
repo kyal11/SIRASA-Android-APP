@@ -145,7 +145,7 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 CustomOptionTime(
-                    selectedRoomName.isEmpty() && selectedDate == null,
+                    if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
                     options = availableSlots,
                     selectedOptions = selectedSlots.mapNotNull { id ->
                         availableSlots.find { it.second == id }?.first

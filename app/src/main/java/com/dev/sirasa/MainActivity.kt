@@ -60,7 +60,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import com.dev.sirasa.screens.user.history.MoreBookingScreen
+import com.dev.sirasa.screens.user.history.MoreHistoryScreen
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -198,10 +201,22 @@ fun AuthScreen(snackbarHostState: SnackbarHostState, viewModel: MainViewModel = 
 @Composable
 fun MainScreenUser(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // List of routes where bottom navigation should be hidden
+    val routesWithoutBottomBar = listOf("auth_screen", "more_booking", "more_history")
+
+    // Check if bottom bar should be shown for current route
+    val showBottomBar = currentRoute !in routesWithoutBottomBar
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { BottomNavUser(navController) }
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavUser(navController)
+            }
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -226,7 +241,7 @@ fun MainScreenUser(snackbarHostState: SnackbarHostState) {
                 Box(
                     modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
                 ) {
-                    UserHistoryScreen()
+                    UserHistoryScreen(navController)
                 }
             }
             composable(BottomNavItemUser.Profile.route) {
@@ -236,6 +251,8 @@ fun MainScreenUser(snackbarHostState: SnackbarHostState) {
                     ProfileScreen(navController, snackbarHostState)
                 }
             }
+            composable("more_history") { MoreHistoryScreen(onBack = { navController.popBackStack() }) }
+            composable("more_booking") { MoreBookingScreen(onBack = { navController.popBackStack() }) }
             composable("auth_screen") { AuthScreen(snackbarHostState) }
         }
     }

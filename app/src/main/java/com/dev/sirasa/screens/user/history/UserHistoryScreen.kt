@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -25,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -32,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,149 +47,251 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.dev.sirasa.data.remote.response.booking.BookingSlotItem
+import com.dev.sirasa.data.remote.response.booking.SlotBooking
+import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 import com.dev.sirasa.utils.generateQrCodeBitmap
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 @Composable
-fun UserHistoryScreen() {
+fun UserHistoryScreen(navController: NavController, viewModel: HistoryMainModel = hiltViewModel()) {
+    val history by viewModel.history.collectAsState()
+    val historyActive by viewModel.historyActive.collectAsState()
+    val historyState by viewModel.historyState.collectAsState()
+    val activeState by viewModel.activeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getHistoryUser()
+        viewModel.getActiveBooking()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-
-        Box(
-            modifier = Modifier.weight(2f)
-        ) {
-            Column {
-                Row (
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Peminjaman yang sedang berlangsung",
-                        style = Typography.titleMedium
-                    )
-                    IconButton(onClick = { }, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "More", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+        if (activeState is HistoryActiveState.Success && historyActive.isNotEmpty()) {
+            Box(
+                modifier = Modifier.weight(2f)
+            ) {
+                Column {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Peminjaman yang sedang berlangsung",
+                            style = Typography.titleMedium
+                        )
+                        IconButton(onClick = {
+                            navController.navigate("more_booking")
+                        }, modifier = Modifier.size(24.dp)) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "More",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    item {
-                        CardHistory(
-                            idBooking = "12345",
-                            dateBooking = "12 Februari 2025",
-                            name = "Budi Santoso",
-                            phone = "081234567890",
-                            timeSlot = "14:00 - 16:00",
-                            location = "Ruang Rapat A",
-                            participants = "5 Orang",
-                            description = "Meeting internal tim proyek",
-                            status = "Booking",
-                            onCancelBooking = {} // Bisa dibatalkan
-                        )
-                        CardHistory(
-                            idBooking = "12345",
-                            dateBooking = "13 Februari 2025",
-                            name = "Budi Santoso",
-                            phone = "081234567890",
-                            timeSlot = "14:00 - 16:00",
-                            location = "Ruang Rapat A",
-                            participants = "5 Orang",
-                            description = "Meeting internal tim proyek",
-                            status = "Booking",
-                            onCancelBooking = {} // Bisa dibatalkan
-                        )
-                        CardHistory(
-                            idBooking = "12345",
-                            dateBooking = "14 Februari 2025",
-                            name = "Budi Santoso",
-                            phone = "081234567890",
-                            timeSlot = "14:00 - 16:00",
-                            location = "Ruang Rapat A",
-                            participants = "5 Orang",
-                            description = "Meeting internal tim proyek",
-                            status = "Booking",
-                            onCancelBooking = {} // Bisa dibatalkan
-                        )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    when (activeState) {
+                        is HistoryActiveState.Loading -> {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
+                            }
+                        }
+
+                        is HistoryActiveState.Error -> {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = (activeState as HistoryActiveState.Error).message,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+
+                        is HistoryActiveState.Success -> {
+                            if (historyActive.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Tidak ada peminjaman yang sedang berlangsung")
+                                }
+                            } else {
+                                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                    items(historyActive) { booking ->
+                                        val roomName =
+                                            booking.room?.name ?: "Ruangan tidak tersedia"
+                                        val date =
+                                            formatDate(booking.bookingSlot?.firstOrNull()?.slot?.date)
+                                        val timeSlot = formatTimeSlot(booking.bookingSlot)
+
+                                        CardHistory(
+                                            idBooking = booking.id,
+                                            dateBooking = date,
+                                            name = roomName,
+                                            phone = "tes",
+                                            timeSlot = timeSlot,
+                                            location = "Lantai ${booking.room?.floor}",
+                                            participants = "${booking.participant} Orang",
+                                            description = if (booking.description.isNullOrEmpty()) "tidak ada" else booking.description,
+                                            status = booking.status,
+                                            onCancelBooking = {
+                                                viewModel.cancelBooking(booking.id)
+                                            }
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
+                            }
+                        }
+
+                        else -> { /* Idle state */
+                        }
                     }
                 }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Bagian Riwayat Peminjaman
+        if (historyState is HistoryBookingState.Success && history.isNotEmpty()) {
         Column(modifier = Modifier.weight(3f)) {
-            Row (
+            Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Riawayat Peminjaman",
+                    "Riwayat Peminjaman",
                     style = Typography.titleMedium
                 )
-                IconButton(onClick = { }, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "More", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                IconButton(onClick = {
+                    navController.navigate("more_history")
+                }, modifier = Modifier.size(24.dp)) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "More",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(6.dp))
-            LazyColumn {
-                item {
-                    CardHistory(
-                        idBooking = "54321",
-                        dateBooking = "10 Januari 2025",
-                        name = "Siti Aminah",
-                        phone = "089876543210",
-                        timeSlot = "09:00 - 11:00",
-                        location = "Ruang Diskusi B",
-                        participants = "8 Orang",
-                        description = "Diskusi strategi pemasaran",
-                        status = "Cancel",
-                    )
-                    CardHistory(
-                        idBooking = "67890",
-                        dateBooking = "5 Januari 2025",
-                        name = "Andi Wijaya",
-                        phone = "085678901234",
-                        timeSlot = "13:00 - 15:00",
-                        location = "Ruang Workshop C",
-                        participants = "12 Orang",
-                        description = "Pelatihan teknologi terbaru",
-                        status = "Selesai",
-                    )
-                    CardHistory(
-                        idBooking = "54321",
-                        dateBooking = "10 Januari 2025",
-                        name = "Siti Aminah",
-                        phone = "089876543210",
-                        timeSlot = "09:00 - 11:00",
-                        location = "Ruang Diskusi B",
-                        participants = "8 Orang",
-                        description = "Diskusi strategi pemasaran",
-                        status = "Cancel",
-                    )
-                    CardHistory(
-                        idBooking = "67890",
-                        dateBooking = "5 Januari 2025",
-                        name = "Andi Wijaya",
-                        phone = "085678901234",
-                        timeSlot = "13:00 - 15:00",
-                        location = "Ruang Workshop C",
-                        participants = "12 Orang",
-                        description = "Pelatihan teknologi terbaru",
-                        status = "Selesai",
-                    )
-                    // CardHistory lainnya jika diperlukan
+            when (historyState) {
+                is HistoryBookingState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
+                    }
+                }
+
+                is HistoryBookingState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = (historyState as HistoryBookingState.Error).message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+
+                is HistoryBookingState.Success -> {
+                    if (history.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Tidak ada peminjaman yang sedang berlangsung")
+                        }
+                    } else {
+                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                            items(history) { booking ->
+                                val roomName = booking.room?.name ?: "Ruangan tidak tersedia"
+                                val date =
+                                    formatDate(booking.bookingSlot?.firstOrNull()?.slot?.date)
+                                val timeSlot = formatTimeSlot(booking.bookingSlot)
+
+                                CardHistory(
+                                    idBooking = booking.id,
+                                    dateBooking = date,
+                                    name = roomName,
+                                    phone = "tes",
+                                    timeSlot = timeSlot,
+                                    location = "Lantai ${booking.room?.floor}",
+                                    participants = "${booking.participant} Orang",
+                                    description = if (booking.description.isNullOrEmpty()) "tidak ada" else booking.description,
+                                    status = booking.status,
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                }
+
+                else -> { /* Idle state */
                 }
             }
         }
+        }
+    }
+}
+fun formatDate(dateString: String?): String {
+    if (dateString == null) return "Tanggal tidak tersedia"
+
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+        val date = inputFormat.parse(dateString)
+
+        val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id"))
+        outputFormat.format(date!!)
+    } catch (e: Exception) {
+        "Tanggal tidak valid"
     }
 }
 
+// Helper function to format time slot
+fun formatTimeSlot(slots: List<BookingSlotItem?>?): String {
+    if (slots.isNullOrEmpty()) return "Waktu tidak tersedia"
+
+    val sortedSlots = slots.sortedBy { it?.slot?.startTime }
+
+    val startTime = sortedSlots.firstOrNull()?.slot?.startTime
+    val endTime = sortedSlots.lastOrNull()?.slot?.endTime
+
+    return if (startTime != null && endTime != null) {
+        "$startTime - $endTime"
+    } else {
+        "Waktu tidak tersedia"
+    }
+}
+
+// Extension function to use with LazyColumn
+fun <T> LazyListScope.items(
+    items: List<T>,
+    itemContent: @Composable (T) -> Unit
+) {
+    items(items.size) {
+        itemContent(items[it])
+    }
+}
 @Composable
 fun CardHistory(
     idBooking: String,
@@ -200,9 +306,9 @@ fun CardHistory(
     onCancelBooking: (() -> Unit)? = null
 ) {
     val (badgeColor, statusText) = when (status) {
-        "Cancel" -> Color.Red to "Dibatalkan"
-        "Booking" -> Color.Yellow to "Dipesan"
-        "Selesai" -> Green300 to "Selesai"
+        "cancel" -> Color.Red to "Dibatalkan"
+        "booked" -> Color.Yellow to "Dipesan"
+        "done" -> Green300 to "Selesai"
         else -> Color.Gray to "Unknown"
     }
     var showQr by remember { mutableStateOf(false) }
@@ -222,7 +328,7 @@ fun CardHistory(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(dateBooking, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                if (status == "Booking") {
+                if (status == "booked") {
                     Box {
                         IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(24.dp)) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More", tint = MaterialTheme.colorScheme.onPrimaryContainer)
@@ -259,7 +365,7 @@ fun CardHistory(
                 Badge(
                     modifier = Modifier.padding(8.dp),
                     containerColor = badgeColor,
-                    contentColor = if (status == "Cancel") Color.White else Color.Black
+                    contentColor = if (status == "cancel") Color.White else Color.Black
                 ) {
                     Text(statusText, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = Typography.titleMedium)
                 }
@@ -274,7 +380,7 @@ fun CardHistory(
             Spacer(modifier = Modifier.height(6.dp))
             Text(description, style = Typography.bodyMedium, maxLines = 2)
 
-            if (status == "Booking") {
+            if (status == "booked") {
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = { showQr = true },
@@ -341,41 +447,41 @@ fun GenerateQrCode(text: String) {
 //    }
 //}
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewHistory() {
-    SirasaTheme {
-        UserHistoryScreen()
-    }
-}
-@Preview(showBackground = true, name = "Phone Preview", device = Devices.PHONE)
-@Composable
-fun PreviewPhone() {
-    SirasaTheme {
-        UserHistoryScreen()
-    }
-}
-
-@Preview(showBackground = true, name = "Tablet Preview", device = Devices.TABLET)
-@Composable
-fun PreviewTablet() {
-    SirasaTheme {
-        UserHistoryScreen()
-    }
-}
-
-@Preview(showBackground = true, name = "Small Device Preview", widthDp = 320, heightDp = 640)
-@Composable
-fun PreviewSmallDevice() {
-    SirasaTheme {
-        UserHistoryScreen()
-    }
-}
-
-@Preview(showBackground = true, name = "Large Device Preview", widthDp = 600, heightDp = 800)
-@Composable
-fun PreviewLargeDevice() {
-    SirasaTheme {
-        UserHistoryScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewHistory() {
+//    SirasaTheme {
+//        UserHistoryScreen()
+//    }
+//}
+//@Preview(showBackground = true, name = "Phone Preview", device = Devices.PHONE)
+//@Composable
+//fun PreviewPhone() {
+//    SirasaTheme {
+//        UserHistoryScreen()
+//    }
+//}
+//
+//@Preview(showBackground = true, name = "Tablet Preview", device = Devices.TABLET)
+//@Composable
+//fun PreviewTablet() {
+//    SirasaTheme {
+//        UserHistoryScreen()
+//    }
+//}
+//
+//@Preview(showBackground = true, name = "Small Device Preview", widthDp = 320, heightDp = 640)
+//@Composable
+//fun PreviewSmallDevice() {
+//    SirasaTheme {
+//        UserHistoryScreen()
+//    }
+//}
+//
+//@Preview(showBackground = true, name = "Large Device Preview", widthDp = 600, heightDp = 800)
+//@Composable
+//fun PreviewLargeDevice() {
+//    SirasaTheme {
+//        UserHistoryScreen()
+//    }
+//}

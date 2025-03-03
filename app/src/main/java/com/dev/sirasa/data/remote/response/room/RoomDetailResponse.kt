@@ -17,25 +17,25 @@ data class RoomDetailResponse(
 data class DataRoomDetail(
 
 	@field:SerializedName("slots")
-	val slots: List<SlotsDetailItem?>? = null,
+	val slots: List<SlotsDetailItem> ,
 
 	@field:SerializedName("name")
-	val name: String? = null,
+	val name: String,
 
 	@field:SerializedName("startTime")
-	val startTime: String? = null,
+	val startTime: String,
 
 	@field:SerializedName("id")
-	val id: String? = null,
+	val id: String,
 
 	@field:SerializedName("endTime")
-	val endTime: String? = null,
+	val endTime: String,
 
 	@field:SerializedName("floor")
-	val floor: Int? = null,
+	val floor: Int,
 
 	@field:SerializedName("capacity")
-	val capacity: Int? = null
+	val capacity: Int
 )
 
 data class SlotsDetailItem(

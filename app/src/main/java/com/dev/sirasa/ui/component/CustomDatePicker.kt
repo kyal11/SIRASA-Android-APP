@@ -19,6 +19,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dev.sirasa.ui.theme.Green600
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 import java.text.SimpleDateFormat
@@ -99,13 +100,13 @@ fun DatePickerModal(
     )
     val customColors = DatePickerDefaults.colors(
         // Warna container keseluruhan
-        containerColor = Color(0xFFF0F8FF),
+        containerColor = Color(0xFFFFFFFF),
         // Warna untuk hari yang dipilih
         selectedDayContainerColor = Color(0xFF00AA00),  // Hijau untuk hari yang dipilih
         selectedDayContentColor = Color.White,
         // Warna untuk hari ini
-        todayContentColor = Color(0xFF0000FF),  // Biru untuk hari ini
-        todayDateBorderColor = Color(0xFF0000FF),
+        todayContentColor = Green600,  // Biru untuk hari ini
+        todayDateBorderColor = Green600,
         // Warna untuk header dan konten lainnya
         titleContentColor = Color(0xFF000000),
         headlineContentColor = Color(0xFF000000),
@@ -129,9 +130,14 @@ fun DatePickerModal(
                 Text("Cancel")
             }
         },
-        colors = customColors,
+        colors = DatePickerDefaults.colors(
+            containerColor = Color.White
+        ),
     ) {
-        DatePicker(state = datePickerState)
+        DatePicker(
+            state = datePickerState,
+            colors = customColors
+        )
     }
 }
 
