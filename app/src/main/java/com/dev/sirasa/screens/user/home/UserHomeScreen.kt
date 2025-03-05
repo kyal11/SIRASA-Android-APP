@@ -2,6 +2,8 @@ package com.dev.sirasa.screens.user.home
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,11 +39,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dev.sirasa.R
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
@@ -47,6 +59,9 @@ import com.dev.sirasa.ui.component.DropdownField
 import com.dev.sirasa.ui.component.InputField
 import com.dev.sirasa.ui.component.InputFieldTextArea
 import com.dev.sirasa.ui.component.LoadingCircular
+import com.dev.sirasa.ui.theme.Green600
+import com.dev.sirasa.ui.theme.Green800
+import com.dev.sirasa.ui.theme.Green900
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 
@@ -207,6 +222,194 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
     }
 }
 
+@Composable
+fun DialogBooking(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                .padding(8.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Tutup",
+                            tint = Green900
+                        )
+                    }
+                }
+                // Jika Berhasil
+//                Column (
+//                    modifier = Modifier.padding(8.dp)
+//                ) {
+//                    Text(
+//                        "Hasil Pemesanan",
+//                        modifier = Modifier.fillMaxWidth(),
+//                        textAlign = TextAlign.Center,
+//                        style = MaterialTheme.typography.titleLarge,
+//                        color = Green900
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "5 Maret 2025",
+//                        modifier = Modifier.fillMaxWidth(),
+//                        textAlign = TextAlign.End,
+//                        style = MaterialTheme.typography.displayMedium,
+//                        color = Green800
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "Rizky Al Arief",
+//                        style = MaterialTheme.typography.titleMedium,
+//                        color = Green900
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "0838127215",
+//                        style = MaterialTheme.typography.displayMedium,
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "12:00 - 14:00",
+//                        style = MaterialTheme.typography.displayMedium,
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "Ruang Danantara",
+//                        style = MaterialTheme.typography.displayMedium,
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "10 Oranng",
+//                        style = MaterialTheme.typography.displayMedium,
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        "Deskripsi Deskripsi Deskripsi Deskripsi",
+//                        style = MaterialTheme.typography.displayMedium,
+//                    )
+//                    Spacer(modifier = Modifier.height(6.dp))
+//                    Text(
+//                        buildAnnotatedString {
+//                            withStyle(style = SpanStyle(color = Color.Red)) { append("* ") }
+//                            append("Temukan semua detail pemesanan ruangan Anda di menu Riwayat. Jadi, jika Anda perlu memeriksa pemesanan sebelumnya, cukup buka menu Riwayat. Terima kasih!")
+//                        },
+//                        style = MaterialTheme.typography.titleMedium,
+//                        modifier = Modifier.fillMaxWidth(),
+//                        textAlign = TextAlign.Center
+//                    )
+//                }
+
+                // Jika gagal dan rekomendasi
+                Column (
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        "Hasil Pemesanan",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Green900
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Tutup",
+                                modifier = Modifier.size(64.dp)
+                            )
+                        }
+                    }
+                    Text(
+                        "Gagal",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        "Salah satu slot waktu tidak tersedia..",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.displayMedium,
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        "Rekomendasi Ruangan",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Green800
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        RoomRecommendation("Ruang 3", "23 Maret 2025","16.00 s/d 17.00")
+                        RoomRecommendation("Ruang 4", "23 Maret 2025","15.00 s/d 16.00")
+                        RoomRecommendation("Ruang Danantara", "23 Maret 2025","15.00 s/d 16.00")
+                    }
+                }
+            }
+        }
+    }
+}
+@Composable
+fun RoomRecommendation(roomName: String, date: String ,time: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .border(1.dp, Color.Black, shape = RoundedCornerShape(4.dp))
+                .padding(8.dp).fillMaxWidth(0.6f),
+        ) {
+            Text(
+                text = roomName,
+                style = MaterialTheme.typography.titleMedium,
+                color = Green800,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = date,
+                style = MaterialTheme.typography.displayMedium,
+            )
+            Text(
+                text = time,
+                style = MaterialTheme.typography.displayMedium,
+            )
+        }
+        Button(
+            onClick = { /* TODO: Handle booking */ },
+            shape = RoundedCornerShape(8.dp)
+            ) {
+            Text(text = "Pesan")
+        }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun Preview() {
+    SirasaTheme {
+        DialogBooking { true }
+    }
+}
 //@Preview(showBackground = true)
 //@Composable
 //fun PreviewUserHome() {

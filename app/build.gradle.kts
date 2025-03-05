@@ -81,7 +81,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.androidx.datastore.preferences)
-    
+    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.google.zxing:core:3.5.1")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)

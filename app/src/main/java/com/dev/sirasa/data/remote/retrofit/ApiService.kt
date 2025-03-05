@@ -12,12 +12,18 @@ import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
+import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
+import com.dev.sirasa.data.remote.response.user.GetUserResponse
+import com.dev.sirasa.data.remote.response.user.UpdateAccount
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -110,4 +116,27 @@ interface ApiService {
     suspend fun validationBooking(
         @Path("id") id: String
     ) : BookingUserResponse
+
+    //Users
+    @GET("users")
+    suspend fun getAllUser() : GetUserResponse
+
+    @GET("users/{id}")
+    suspend fun getUserById(
+        @Path("id") id: String
+    ) : GetDetailUserResponse
+
+    @GET("users/detail")
+    suspend fun getDetailUser() : GetDetailUserResponse
+
+    @Multipart
+    @PUT("users")
+    suspend fun updateAccount(
+        @Part parts: List<MultipartBody.Part>
+    ): GetDetailUserResponse
+
+    @PUT("users/{id}")
+    suspend fun updateUsers(
+        @Body request: UpdateAccount
+    ) : GetDetailUserResponse
 }
