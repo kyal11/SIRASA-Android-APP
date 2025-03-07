@@ -1,8 +1,11 @@
 package com.dev.sirasa.screens.user.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
+import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
+import com.dev.sirasa.data.remote.response.booking.RecommendationResponse
 import com.dev.sirasa.data.remote.response.room.DataRoom
 import com.dev.sirasa.data.remote.response.room.DataRoomDetail
 import com.dev.sirasa.data.repository.BookingRepository
@@ -30,6 +33,12 @@ class UserViewModel @Inject constructor(
 
     private val _roomDetailState = MutableStateFlow<RoomDetailState>(RoomDetailState.Idle)
     val roomDetailState: StateFlow<RoomDetailState> = _roomDetailState.asStateFlow()
+
+    private val _booking = MutableStateFlow(CreateBookingResponse(data = null, message = "", status = ""))
+    val booking: StateFlow<CreateBookingResponse> = _booking.asStateFlow()
+
+    private val _recommendation = MutableStateFlow(RecommendationResponse(data = emptyList(), message = "", status = ""))
+    val recommendation: StateFlow<RecommendationResponse> = _recommendation.asStateFlow()
 
     private val _bookingState = MutableStateFlow<BookingState>(BookingState.Idle)
     val bookingState: StateFlow<BookingState> = _bookingState.asStateFlow()
@@ -72,19 +81,41 @@ class UserViewModel @Inject constructor(
 
     fun createBooking(request: CreateBookingRequest) {
         viewModelScope.launch {
+            Log.d("UserViewModel", "Memulai proses booking...")
             _bookingState.value = BookingState.Loading
+
             bookingRepository.createBooking(request)
                 .catch { exception ->
+                    Log.e("UserViewModel", "Error dalam booking: ${exception.message}", exception)
                     _bookingState.value = BookingState.Error(exception.message ?: "Terjadi kesalahan")
                 }
                 .collect { response ->
-                    if (response.status == "success") {
-                        _bookingState.value = BookingState.Success(response.message ?: "Booking berhasil dibuat")
-                    } else {
-                        _bookingState.value = BookingState.Error(response.message ?: "Gagal membuat booking")
+                    when (response) {
+                        is BookingResult.Success -> {
+                            val bookingData = response.response.data
+                            if (bookingData != null) {
+                                Log.d("UserViewModel", "Booking sukses: $bookingData")
+                                _bookingState.value = BookingState.Success(bookingData)
+                            } else {
+                                Log.e("UserViewModel", "Data booking tidak ditemukan!")
+                                _bookingState.value = BookingState.Error("Data booking tidak ditemukan")
+                            }
+                        }
+                        is BookingResult.Recommendation -> {
+                            val recommendationData = response.response.data
+                            Log.d("UserViewModel", "Menerima rekomendasi booking: ${response.response}")
+                            _bookingState.value = BookingState.Recommendation(recommendationData)
+                        }
+                        is BookingResult.Error -> {
+                            Log.e("UserViewModel", "Booking gagal: ${response.message}")
+                            _bookingState.value = BookingState.Error(response.message)
+                        }
                     }
                 }
         }
+    }
+    fun resetBookingState() {
+        _bookingState.value = BookingState.Idle
     }
 }
 

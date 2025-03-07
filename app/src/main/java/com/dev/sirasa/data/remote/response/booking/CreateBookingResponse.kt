@@ -85,6 +85,9 @@ data class DataBooking(
 	@field:SerializedName("status")
 	val status: String? = null,
 
+	@field:SerializedName("description")
+	val description: String? = null,
+
 	@field:SerializedName("updatedAt")
 	val updatedAt: String? = null
 )
@@ -94,4 +97,9 @@ data class CreateBookingRequest(
 	val bookingSlotId: List<String>,
 	val participant: Int,
 	val description: String?
+)
+
+open class BaseBookingResponse(
+	open val status: String?,
+	open val message: String?
 )

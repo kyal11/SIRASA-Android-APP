@@ -6,6 +6,7 @@ import com.dev.sirasa.data.remote.response.auth.LoginResponse
 import com.dev.sirasa.data.remote.response.auth.LogoutResponse
 import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
+import com.dev.sirasa.data.remote.response.booking.BaseBookingResponse
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
@@ -99,7 +100,7 @@ interface ApiService {
     @POST("bookings")
     suspend fun createBooking(
         @Body request: CreateBookingRequest
-    ): CreateBookingResponse
+    ) : Any
 
     @GET("bookings/history")
     suspend fun getBookingHistory() : BookingUserResponse

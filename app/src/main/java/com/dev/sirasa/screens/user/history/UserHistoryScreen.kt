@@ -55,6 +55,8 @@ import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
+import com.dev.sirasa.utils.formatDate
+import com.dev.sirasa.utils.formatTimeSlot
 import com.dev.sirasa.utils.generateQrCodeBitmap
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -144,7 +146,6 @@ fun UserHistoryScreen(navController: NavController, viewModel: HistoryMainModel 
                                             idBooking = booking.id,
                                             dateBooking = date,
                                             name = roomName,
-                                            phone = "tes",
                                             timeSlot = timeSlot,
                                             location = "Lantai ${booking.room?.floor}",
                                             participants = "${booking.participant} Orang",
@@ -232,7 +233,6 @@ fun UserHistoryScreen(navController: NavController, viewModel: HistoryMainModel 
                                     idBooking = booking.id,
                                     dateBooking = date,
                                     name = roomName,
-                                    phone = "tes",
                                     timeSlot = timeSlot,
                                     location = "Lantai ${booking.room?.floor}",
                                     participants = "${booking.participant} Orang",
@@ -252,52 +252,13 @@ fun UserHistoryScreen(navController: NavController, viewModel: HistoryMainModel 
         }
     }
 }
-fun formatDate(dateString: String?): String {
-    if (dateString == null) return "Tanggal tidak tersedia"
 
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-        val date = inputFormat.parse(dateString)
-
-        val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id"))
-        outputFormat.format(date!!)
-    } catch (e: Exception) {
-        "Tanggal tidak valid"
-    }
-}
-
-// Helper function to format time slot
-fun formatTimeSlot(slots: List<BookingSlotItem?>?): String {
-    if (slots.isNullOrEmpty()) return "Waktu tidak tersedia"
-
-    val sortedSlots = slots.sortedBy { it?.slot?.startTime }
-
-    val startTime = sortedSlots.firstOrNull()?.slot?.startTime
-    val endTime = sortedSlots.lastOrNull()?.slot?.endTime
-
-    return if (startTime != null && endTime != null) {
-        "$startTime - $endTime"
-    } else {
-        "Waktu tidak tersedia"
-    }
-}
-
-// Extension function to use with LazyColumn
-fun <T> LazyListScope.items(
-    items: List<T>,
-    itemContent: @Composable (T) -> Unit
-) {
-    items(items.size) {
-        itemContent(items[it])
-    }
-}
 @Composable
 fun CardHistory(
     idBooking: String,
     dateBooking: String,
     name: String,
-    phone: String,
+    phone: String? = null,
     timeSlot: String,
     location: String,
     participants: String,
@@ -359,8 +320,12 @@ fun CardHistory(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(name, maxLines = 2 , color = MaterialTheme.colorScheme.onPrimaryContainer, style = Typography.titleLarge)
+                    if (phone != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(phone, style = Typography.bodyMedium)
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(phone, style = Typography.bodyMedium)
+                    Text(timeSlot, style = Typography.bodyMedium)
                 }
                 Badge(
                     modifier = Modifier.padding(8.dp),
@@ -370,9 +335,6 @@ fun CardHistory(
                     Text(statusText, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = Typography.titleMedium)
                 }
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(timeSlot, style = Typography.bodyMedium)
             Spacer(modifier = Modifier.height(6.dp))
             Text(location, style = Typography.bodyMedium)
             Spacer(modifier = Modifier.height(6.dp))
@@ -426,6 +388,14 @@ fun GenerateQrCode(text: String) {
             contentDescription = "QR Code",
             modifier = Modifier.size(250.dp)
         )
+    }
+}
+fun <T> LazyListScope.items(
+    items: List<T>,
+    itemContent: @Composable (T) -> Unit
+) {
+    items(items.size) {
+        itemContent(items[it])
     }
 }
 //@Preview(showBackground = true)
