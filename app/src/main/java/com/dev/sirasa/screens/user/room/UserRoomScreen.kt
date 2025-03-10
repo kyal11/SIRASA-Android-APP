@@ -23,17 +23,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,73 +55,92 @@ import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.Green900
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserRoomScreen(viewModel: RoomViewModel = hiltViewModel()) {
     val roomsState by viewModel.roomsSlotsState.collectAsState()
     val roomsList by viewModel.roomSlots.collectAsState()
-    val days = remember {
-        generateNextDays(3)
-    }
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val days = remember { generateNextDays(3) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val refreshState = rememberPullToRefreshState()
+
     LaunchedEffect(selectedTabIndex) {
-        // Format the date as needed by API (YYYY-MM-DD)
         val dayValue = (selectedTabIndex + 1).toString()
         viewModel.getAllRoomsSlots(dayValue)
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .padding(
-                    WindowInsets.navigationBars.asPaddingValues()
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Informasi Ruangan",
-                style = Typography.displayLarge
-            )
-            TabDayRoom(
-                selectedOption = selectedTabIndex,
-                onOptionSelected = { selectedTabIndex = it },
-                listOption = days.map {
-                    SimpleDateFormat("dd MMM", Locale("id")).format(it)
-                }
-            )
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(
-                    roomsList.size,
-                    key = { index -> roomsList[index]?.id ?: "" }
-                ) { index ->
-                    roomsList[index]?.let { room ->
-                        CardRoom(
-                            roomName = room.name,
-                            floorName = room.floor.toString(),
-                            capacitu = room.capacity.toString(),
-                            dateRoom = formatISODateToIndonesian(room.slots.firstOrNull()?.date),
-                            timeSlots = room.slots.map { slot ->
-                                Pair(slot.startTime, slot.isBooked)
-                            }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .padding(WindowInsets.navigationBars.asPaddingValues()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Informasi Ruangan",
+                    style = Typography.displayLarge
+                )
+                TabDayRoom(
+                    selectedOption = selectedTabIndex,
+                    onOptionSelected = { selectedTabIndex = it },
+                    listOption = days.map {
+                        SimpleDateFormat("dd MMM", Locale("id")).format(it)
+                    }
+                )
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        val dayValue = (selectedTabIndex + 1).toString()
+                        viewModel.refreshRooms(dayValue)
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    state = refreshState,
+                    indicator = {
+                        Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            isRefreshing = isRefreshing,
+                            containerColor = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            state = refreshState
                         )
+                    },
+                ) {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(
+                        roomsList.size,
+                        key = { index -> roomsList[index]?.id ?: "" }
+                    ) { index ->
+                        roomsList[index]?.let { room ->
+                            CardRoom(
+                                roomName = room.name,
+                                floorName = room.floor.toString(),
+                                capacitu = room.capacity.toString(),
+                                dateRoom = formatISODateToIndonesian(room.slots.firstOrNull()?.date),
+                                timeSlots = room.slots.map { slot ->
+                                    Pair(slot.startTime, slot.isBooked)
+                                }
+                            )
+                        }
                     }
                 }
+                    }
+            }
+            if (roomsState is RoomsSlotsState.Loading) {
+                LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
             }
         }
-        if (roomsState is RoomsSlotsState.Loading) {
-            LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
-        }
-    }
+
 }
+
 fun generateNextDays(count: Int): List<Date> {
     val calendar = Calendar.getInstance()
     return List(count) { index ->

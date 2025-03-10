@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -61,6 +64,7 @@ import com.dev.sirasa.ui.component.DropdownField
 import com.dev.sirasa.ui.component.InputField
 import com.dev.sirasa.ui.component.InputFieldTextArea
 import com.dev.sirasa.ui.component.LoadingCircular
+import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.Green600
 import com.dev.sirasa.ui.theme.Green800
 import com.dev.sirasa.ui.theme.Green900
@@ -83,6 +87,12 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
     var showFailedDialog by remember { mutableStateOf(false) }
     var bookingData by remember { mutableStateOf<DataBooking?>(null) }
     var recommendationData by remember { mutableStateOf<List<DataRecommendation?>?>(emptyList()) }
+    var recommendationMsg by remember { mutableStateOf("") }
+    var dateError by remember { mutableStateOf(false) }
+    var roomError by remember { mutableStateOf(false) }
+    var slotError by remember { mutableStateOf(false) }
+    var capacityError by remember { mutableStateOf(false) }
+
     //Data View Model
     val rooms by userViewModel.rooms.collectAsState()
     LaunchedEffect(Unit) {
@@ -111,8 +121,10 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             }
             is BookingState.Recommendation -> {
                 val data = (bookingState as BookingState.Recommendation).data
+                val message= (bookingState as BookingState.Recommendation).message
                 Log.d("homescreen", "Booking sukses: $data")
                 recommendationData = data
+                recommendationMsg = message
                 showFailedDialog = true
             }
             is BookingState.Error -> {
@@ -132,14 +144,14 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             .fillMaxSize()
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 16.dp)
-                .navigationBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize().padding(vertical = 4.dp, horizontal = 16.dp)
+                .navigationBarsPadding().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 painter = painterResource(id = R.drawable.perpus_logo),
                 contentDescription = "Logo Sirasa",
-                modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(80.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(80.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -153,7 +165,18 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
-            DateField { date -> selectedDate = date }
+            DateField { date ->
+                selectedDate = date
+                dateError = date.isEmpty()
+            }
+            if (dateError) {
+                Text(
+                    text = "Harap pilih tanggal terlebih dahulu",
+                    color = Color.Red,
+                    style = Typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
 
             DropdownField(
@@ -162,8 +185,17 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
                 onOptionSelected = { selectedName ->
                     selectedRoomName = selectedName
                     selectedRoomId = rooms.find { it.name == selectedName }?.id
+                    roomError = selectedRoomId == null
                 }
             )
+            if (roomError) {
+                Text(
+                    text = "Harap pilih ruangan terlebih dahulu",
+                    color = Color.Red,
+                    style = Typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -176,26 +208,48 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CustomOptionTime(
-                    if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
-                    options = availableSlots,
-                    selectedOptions = selectedSlots.mapNotNull { id ->
-                        availableSlots.find { it.second == id }?.first
-                    },
-                    onOptionSelected = { selectedText ->
-                        selectedSlots = selectedText
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-
-                InputField(
-                    label = "Jumlah Peserta",
-                    placeHolder = "Peserta",
-                    value = capacity,
-                    onValueChange = { capacity = it },
-                    keyboardType = KeyboardType.Number,
-                    modifier = Modifier.width(120.dp)
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    CustomOptionTime(
+                        if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
+                        options = availableSlots,
+                        selectedOptions = selectedSlots.mapNotNull { id ->
+                            availableSlots.find { it.second == id }?.first
+                        },
+                        onOptionSelected = { selectedText ->
+                            selectedSlots = selectedText
+                            if (selectedText.isNotEmpty()) slotError = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (slotError) {
+                        Text(
+                            text = "Harap pilih slot waktu",
+                            color = Color.Red,
+                            style = Typography.bodySmall,
+                            modifier = Modifier.align(Alignment.Start)
+                        )
+                    }
+                }
+                Column(modifier = Modifier.width(120.dp)) {
+                    InputField(
+                        label = "Jumlah Peserta",
+                        placeHolder = "Peserta",
+                        value = capacity,
+                        onValueChange = {
+                            capacity = it
+                            capacityError = it.isEmpty() },
+                        keyboardType = KeyboardType.Number,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (capacityError) {
+                        Text(
+                            text = "Harus diisi",
+                            color = Color.Red,
+                            style = Typography.bodySmall,
+                            modifier = Modifier.align(Alignment.Start)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -218,20 +272,27 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = {
-                    val request = CreateBookingRequest(
-                        roomId = selectedRoomId!!,
-                        bookingSlotId = selectedSlots,
-                        participant = capacity.toInt(),
-                        description = description
-                    )
-                    userViewModel.createBooking(request)
+                    dateError = selectedDate == null
+                    roomError = selectedRoomId.isNullOrEmpty()
+                    slotError = selectedSlots.isEmpty()
+                    capacityError = capacity.isEmpty() || capacity.toIntOrNull() == null
+
+                    if (!dateError && !roomError && !slotError && !capacityError) {
+                        val request = CreateBookingRequest(
+                            roomId = selectedRoomId!!,
+                            bookingSlotId = selectedSlots,
+                            participant = capacity.toInt(),
+                            description = description
+                        )
+                        userViewModel.createBooking(request)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(text = "Submit", style = Typography.titleMedium)
             }
+
         }
         if (bookingState is BookingState.Loading) {
             LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
@@ -244,18 +305,28 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             }
         }
         if (showFailedDialog && recommendationData != null) {
+            val request = CreateBookingRequest(
+                roomId = selectedRoomId!!,
+                bookingSlotId = selectedSlots,
+                participant = capacity.toInt(),
+                description = description
+            )
             DialogBookingFailed(
                 data = recommendationData!!,
-                onDismiss = { showFailedDialog = false },
-                onBook = { room, date, time ->
+                message = recommendationMsg,
+                references = request,
+                onDismiss = {
                     showFailedDialog = false
-                    val request = CreateBookingRequest(
-                        roomId = selectedRoomId!!,
+                    userViewModel.resetBookingState() },
+                onBook = { roomId, selectedSlots ->
+                    showFailedDialog = false
+                    val newRequest = CreateBookingRequest(
+                        roomId = roomId,
                         bookingSlotId = selectedSlots,
-                        participant = capacity.toInt(),
-                        description = description
+                        participant = request.participant,
+                        description = request.description
                     )
-                    userViewModel.createBooking(request)
+                    userViewModel.createBooking(newRequest)
                 }
             )
         }
@@ -296,15 +367,36 @@ fun DialogBookingSuccess(data: DataBooking, onDismiss: () -> Unit) {
                 ) {
                     Text("Hasil Pemesanan", textAlign = TextAlign.Center, style = MaterialTheme.typography.titleLarge, color = Green900, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Berhasil",
+                            modifier = Modifier.size(64.dp),
+                            tint = Green300
+                        )
+                    }
+
+                    // Pesan Gagal
+                    Text(
+                        "Berhasil",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Green600
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(date, textAlign = TextAlign.End, style = MaterialTheme.typography.displayMedium, color = Green800, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Nama Pengguna", style = MaterialTheme.typography.titleMedium, color = Green900)
+                    Text(data.user?.name!!, style = MaterialTheme.typography.titleMedium, color = Green900)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("0838127215", style = MaterialTheme.typography.displayMedium)
+                    Text(data.user?.phoneNumber!!, style = MaterialTheme.typography.displayMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(timeSlot, style = MaterialTheme.typography.displayMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Ruang Danantara", style = MaterialTheme.typography.displayMedium)
+                    Text(data.room?.name!!, style = MaterialTheme.typography.displayMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("${data.participant} Orang", style = MaterialTheme.typography.displayMedium)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -333,8 +425,10 @@ fun DialogBookingSuccess(data: DataBooking, onDismiss: () -> Unit) {
 @Composable
 fun DialogBookingFailed(
     data: List<DataRecommendation?>,
+    message: String,
+    references: CreateBookingRequest,
     onDismiss: () -> Unit,
-    onBook: (String, String, String) -> Unit // roomName, date, time
+    onBook: (String, List<String>) -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -347,7 +441,6 @@ fun DialogBookingFailed(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start
             ) {
-                // Tombol Tutup
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -356,13 +449,13 @@ fun DialogBookingFailed(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Tutup",
-                            tint = Green900
+                            tint = Green900,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
 
                 Column(modifier = Modifier.padding(8.dp)) {
-                    // Judul Dialog
                     Text(
                         "Hasil Pemesanan",
                         modifier = Modifier.fillMaxWidth(),
@@ -371,7 +464,6 @@ fun DialogBookingFailed(
                         color = Green900
                     )
 
-                    // Icon Gagal
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -384,7 +476,6 @@ fun DialogBookingFailed(
                         )
                     }
 
-                    // Pesan Gagal
                     Text(
                         "Gagal",
                         modifier = Modifier.fillMaxWidth(),
@@ -393,42 +484,53 @@ fun DialogBookingFailed(
                         color = Color.Red
                     )
                     Text(
-                        "Salah satu slot waktu tidak tersedia.",
+                        translateMessage(message),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleSmall,
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
+                    if (data.isNullOrEmpty()) {
+                        Text(
+                            text = "Tidak ada rekomendasi yang tersedia.",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.Gray
+                        )
+                    } else {
+                        Text(
+                            "Rekomendasi Ruangan",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Green800
+                        )
 
-                    // Rekomendasi Ruangan
-                    Text(
-                        "Rekomendasi Ruangan",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Green800
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            data.forEach { recommendation ->
+                                recommendation?.let {
+                                    val roomId = it.roomId ?: return@let
+                                    val selectedSlots =
+                                        it.slots?.mapNotNull { slot -> slot?.id } ?: emptyList()
+                                    val date = formatDate(it.slots?.firstOrNull()?.date)
+                                    val timeSlot = formatTimeSlotRecommendation(it.slots)
 
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        data.forEach { recommendation ->
-                            recommendation?.let {
-                                val date =
-                                    formatDate(recommendation.slots?.firstOrNull()?.date)
-                                val timeSlot = formatTimeSlotRecommendation(recommendation.slots)
-                                RoomRecommendation(
-                                    roomName = it.roomName ?: "Tanpa Nama",
-                                    date = date,
-                                    time = timeSlot,
-                                    onBook = { room, date, time ->
-                                        onBook(room, date, time)
-                                    }
-                                )
+                                    RoomRecommendation(
+                                        roomName = it.roomName ?: "Tanpa Nama",
+                                        roomId = roomId,
+                                        selectedSlots = selectedSlots,
+                                        date = date,
+                                        time = timeSlot,
+                                        onBook = onBook
+                                    )
+                                }
                             }
                         }
                     }
@@ -438,12 +540,23 @@ fun DialogBookingFailed(
     }
 }
 
+fun translateMessage(message: String): String {
+    return when (message) {
+        "Selected slots are unavailable. Here are alternative options:" ->
+            "Slot yang dipilih tidak tersedia.."
+        "Room capacity is not sufficient. Here are some recommendations:" ->
+            "Kapasitas ruangan tidak mencukupi.."
+        else -> message // Jika ada pesan lain, gunakan yang asli
+    }
+}
 @Composable
 fun RoomRecommendation(
     roomName: String,
+    roomId: String,
+    selectedSlots: List<String>,
     date: String,
     time: String,
-    onBook: (String, String, String) -> Unit
+    onBook: (String, List<String>) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -464,19 +577,24 @@ fun RoomRecommendation(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(6.dp))
-            Text(text = date, style = MaterialTheme.typography.bodyMedium)
-            Text(text = time, style = MaterialTheme.typography.bodyMedium)
+            Text(text = date, style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth())
+            Text(text = time, style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth())
         }
 
-        // Tombol untuk memesan ruangan
+        // Tombol untuk memesan ruangan dengan data rekomendasi yang benar
         Button(
-            onClick = { onBook(roomName, date, time) },
+            onClick = { onBook(roomId, selectedSlots) },
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(text = "Pesan")
         }
     }
 }
+
 
 //@Preview(showBackground = true)
 //@Composable

@@ -9,6 +9,7 @@ import com.dev.sirasa.data.repository.BookingRepository
 import com.dev.sirasa.screens.user.home.RoomDetailState
 import com.dev.sirasa.screens.user.room.RoomsState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,18 @@ class HistoryMainModel @Inject constructor(
     private val _cancelState = MutableStateFlow<CancelBookingState>(CancelBookingState.Idle)
     val cancelState: StateFlow<CancelBookingState> = _cancelState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    fun refreshHistory() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getHistoryUser()
+            getActiveBooking()
+            delay(300)
+            _isRefreshing.value = false
+        }
+    }
     fun getHistoryUser() {
         viewModelScope.launch {
             _historyState.value = HistoryBookingState.Loading

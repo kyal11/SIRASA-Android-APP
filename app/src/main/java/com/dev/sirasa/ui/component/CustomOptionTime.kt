@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -101,12 +102,14 @@ fun CustomOptionTime(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = time,
                                     style = Typography.bodyMedium,
-                                    color = if (isDisabled) Color.Gray else Color.Black
+                                    color = if (isDisabled) Color.Gray else Color.Black,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                                 Checkbox(
                                     checked = selectedItems.contains(id),
@@ -119,7 +122,8 @@ fun CustomOptionTime(
                                                 remove(id)
                                             }
                                         }
-                                    }
+                                    },
+                                    modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                             }
                         }

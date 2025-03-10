@@ -21,6 +21,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -32,14 +34,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.dev.sirasa.screens.user.room.TabDayRoom
+import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel = hiltViewModel()) {
     var selectedOption by remember { mutableIntStateOf(0) }
     val tabTitles = listOf("Hari Ini", "Besok", "Lusa")
+    val dashboardState by viewModel.dashboardState.collectAsState()
+
+    val currentDate = remember {
+        val sdf = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
+        sdf.format(Date())
+    }
+
+    LaunchedEffect(selectedOption) {
+        val dayFilter = when (selectedOption) {
+            0 -> "1"
+            1 -> "2"
+            2 -> "3"
+            else -> "1"
+        }
+        viewModel.getSummaryBooking(dayFilter)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp)
@@ -50,7 +74,7 @@ fun DashboardScreen() {
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            "27 Februari 2024",
+            currentDate,
             style = Typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -59,14 +83,28 @@ fun DashboardScreen() {
             onOptionSelected = { selectedOption = it },
             tabTitles
         )
-        CardDashboard("Total Ruangan", "5", listOf(Color(0xFF3DD043), Color(0xFF3F51B5)))
-        CardDashboard("Total Booking", "17", listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)), {})
-        CardDashboard("Total Booking Selesai", "12", listOf(Color(0xFF36D1DC), Color(0xFF5B86E5)), {})
-        CardDashboard("Total Booking Sedang Digunakan", "3", listOf(Color(0xFFFF9800), Color(0xFF8BC34A)), {})
-        CardDashboard("Total Booking Dibatalkan", "2", listOf(Color(0xFFFF512F), Color(0xFFDD2476)), {})
+
+        when (dashboardState) {
+            is DashboardState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LoadingCircular(true, modifier = Modifier.align(Alignment.Center))
+                }
+            }
+            is DashboardState.Success -> {
+                val data = (dashboardState as DashboardState.Success).data
+                CardDashboard("Total Ruangan", data.data?.totalRooms.toString(), listOf(Color(0xFF3DD043), Color(0xFF3F51B5)))
+                CardDashboard("Total Peminjaman", data.data?.totalBookings.toString(), listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)))
+                CardDashboard("Total Peminjaman Dipesan", data.data?.bookedBookings.toString(), listOf(Color(0xFF36D1DC), Color(0xFF5B86E5)))
+                CardDashboard("Total Peminjaman Selesai", data.data?.doneBookings.toString(), listOf(Color(0xFFFF9800), Color(0xFF8BC34A)))
+                CardDashboard("Total Peminjaman Dibatalkan", data.data?.canceledBookings.toString(), listOf(Color(0xFFFF512F), Color(0xFFDD2476)))
+            }
+            is DashboardState.Error -> {
+                Text("Error: \${(dashboardState as DashboardState.Error).message}")
+            }
+            else -> {}
+        }
     }
 }
-
 @Composable
 fun CardDashboard(
     title: String,
@@ -143,10 +181,10 @@ fun IconButton(onClick: Unit, modifier: Unit, content: Unit) {
 //        CardDashboard("")
 //    }
 //}
-@Preview(showBackground = true)
-@Composable
-fun PreviewDashboard() {
-    SirasaTheme {
-        DashboardScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewDashboard() {
+//    SirasaTheme {
+//        DashboardScreen()
+//    }
+//}

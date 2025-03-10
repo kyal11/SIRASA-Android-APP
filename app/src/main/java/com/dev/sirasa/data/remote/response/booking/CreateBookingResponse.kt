@@ -1,5 +1,7 @@
 package com.dev.sirasa.data.remote.response.booking
 
+import com.dev.sirasa.data.remote.response.room.DataRoom
+import com.dev.sirasa.data.remote.response.user.DataUser
 import com.google.gson.annotations.SerializedName
 
 data class CreateBookingResponse(
@@ -75,6 +77,12 @@ data class DataBooking(
 
 	@field:SerializedName("userId")
 	val userId: String? = null,
+
+	@field:SerializedName("user")
+	val user: DataUser? = null,
+
+	@field:SerializedName("room")
+	val room: DataRoom? = null,
 
 	@field:SerializedName("roomId")
 	val roomId: String? = null,

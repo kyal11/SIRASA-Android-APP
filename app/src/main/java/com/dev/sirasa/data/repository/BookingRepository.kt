@@ -1,6 +1,7 @@
 package com.dev.sirasa.data.repository
 
 import android.util.Log
+import com.dev.sirasa.data.remote.response.booking.BookingSummaryResponse
 import com.dev.sirasa.data.remote.retrofit.ApiService
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
@@ -72,7 +73,9 @@ class BookingRepository @Inject constructor(
     fun getHistoryBookingUser():Flow<BookingUserResponse> = flow {
         emit(apiService.getBookingHistory())
     }
-
+    fun getSummaryBooking(day: String? = null):Flow<BookingSummaryResponse> = flow {
+        emit(apiService.bookingSummary(day))
+    }
     fun getActiveBooking(): Flow<BookingUserResponse> = flow {
         emit(apiService.getBookingActive())
     }

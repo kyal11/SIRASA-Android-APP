@@ -3,6 +3,7 @@ package com.dev.sirasa.screens.user.history
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -62,6 +63,7 @@ fun MoreBookingScreen(onBack: () -> Unit, viewModel: HistoryMainModel = hiltView
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .consumeWindowInsets(innerPadding)
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -119,7 +121,7 @@ fun MoreBookingScreen(onBack: () -> Unit, viewModel: HistoryMainModel = hiltView
                                         viewModel.cancelBooking(booking.id)
                                     }
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
                             }
                         }
                     }

@@ -7,6 +7,7 @@ import com.dev.sirasa.data.remote.response.auth.LogoutResponse
 import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
 import com.dev.sirasa.data.remote.response.booking.BaseBookingResponse
+import com.dev.sirasa.data.remote.response.booking.BookingSummaryResponse
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
@@ -117,6 +118,11 @@ interface ApiService {
     suspend fun validationBooking(
         @Path("id") id: String
     ) : BookingUserResponse
+
+    @GET("bookings/summary")
+    suspend fun bookingSummary(
+        @Query("day") day: String? = null
+    ) : BookingSummaryResponse
 
     //Users
     @GET("users")

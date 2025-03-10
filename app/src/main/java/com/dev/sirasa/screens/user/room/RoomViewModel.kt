@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dev.sirasa.data.remote.response.room.DataRoomDetail
 import com.dev.sirasa.data.repository.RoomRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,17 @@ class RoomViewModel @Inject constructor(
     private val _roomsSlotsState = MutableStateFlow<RoomsSlotsState>(RoomsSlotsState.Idle)
     val roomsSlotsState: StateFlow<RoomsSlotsState> = _roomsSlotsState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    fun refreshRooms(dayValue: String) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getAllRoomsSlots(dayValue)
+            delay(300)
+            _isRefreshing.value = false
+        }
+    }
 
     fun getAllRoomsSlots(day: String) {
         viewModelScope.launch {

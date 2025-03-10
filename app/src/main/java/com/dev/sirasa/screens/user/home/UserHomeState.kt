@@ -15,7 +15,7 @@ sealed class RoomDetailState {
 sealed class BookingState {
     data object Idle : BookingState()
     data object Loading : BookingState()
-    data class Recommendation(val data: List<DataRecommendation?>?) : BookingState()
+    data class Recommendation(val data: List<DataRecommendation?>?, val message: String) : BookingState()
     data class Success(val data: DataBooking) : BookingState()
     data class Error(val message: String) : BookingState()
 }

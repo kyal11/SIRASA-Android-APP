@@ -8,7 +8,7 @@ data class RecommendationResponse(
 	val data: List<DataRecommendation?>? = null,
 
 	@field:SerializedName("message")
-	val message: String? = null,
+	val message: String,
 
 	@field:SerializedName("status")
 	val status: String? = null

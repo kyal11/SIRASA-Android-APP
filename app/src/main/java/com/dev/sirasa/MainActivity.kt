@@ -275,7 +275,7 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                 Box(
                     modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
                 ) {
-                    DashboardScreen()
+                    DashboardScreen(navController)
                 }
             }
             composable(BottomNavItemAdmin.Room.route) {
@@ -293,12 +293,10 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                 }
             }
             composable(BottomNavItemAdmin.Profile.route) {
-                composable(BottomNavItemUser.Profile.route) {
-                    Box(
-                        modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
-                    ) {
-                        ProfileScreen(navController, snackbarHostState)
-                    }
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    ProfileScreen(navController, snackbarHostState)
                 }
             }
             composable("auth_screen") { AuthScreen(snackbarHostState) }

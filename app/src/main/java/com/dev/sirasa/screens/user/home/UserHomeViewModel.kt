@@ -102,14 +102,15 @@ class UserViewModel @Inject constructor(
                             }
                         }
                         is BookingResult.Recommendation -> {
-                            val recommendationData = response.response.data
+                            val recommendationData = response.response
                             Log.d("UserViewModel", "Menerima rekomendasi booking: ${response.response}")
-                            _bookingState.value = BookingState.Recommendation(recommendationData)
+                            _bookingState.value = BookingState.Recommendation(recommendationData.data, recommendationData.message)
                         }
                         is BookingResult.Error -> {
                             Log.e("UserViewModel", "Booking gagal: ${response.message}")
                             _bookingState.value = BookingState.Error(response.message)
                         }
+                        else -> {}
                     }
                 }
         }

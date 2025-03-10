@@ -51,7 +51,7 @@ val Typography = Typography(
     bodySmall = TextStyle(
         fontFamily = interFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 12.sp
+        fontSize = 10.sp
     ),
     displayLarge = TextStyle(
         fontFamily = interFontFamily,
