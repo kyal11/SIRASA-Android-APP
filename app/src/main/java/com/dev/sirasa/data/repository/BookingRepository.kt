@@ -6,6 +6,7 @@ import com.dev.sirasa.data.remote.retrofit.ApiService
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
+import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
 import com.dev.sirasa.data.remote.response.booking.RecommendationResponse
 import com.dev.sirasa.screens.user.home.BookingResult
 import com.google.gson.Gson
@@ -80,11 +81,11 @@ class BookingRepository @Inject constructor(
         emit(apiService.getBookingActive())
     }
 
-    fun cancelBooking(id: String) : Flow<BookingUserResponse> = flow {
+    fun cancelBooking(id: String) : Flow<BookingValidationResponse> = flow {
         emit(apiService.cancelBooking(id))
     }
 
-    fun validationBooking(id: String) : Flow<BookingUserResponse> = flow {
+    fun validationBooking(id: String) : Flow<BookingValidationResponse> = flow {
         emit(apiService.validationBooking(id))
     }
 }

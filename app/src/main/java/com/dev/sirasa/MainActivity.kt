@@ -62,6 +62,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import com.dev.sirasa.screens.admin.qr_code_booking.QrCodeScannerScreen
 import com.dev.sirasa.screens.user.history.MoreBookingScreen
 import com.dev.sirasa.screens.user.history.MoreHistoryScreen
 import kotlinx.coroutines.launch
@@ -283,6 +284,13 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                     modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
                 ) {
                     UserRoomScreen()
+                }
+            }
+            composable(BottomNavItemAdmin.ScanQr.route) {
+                Box(
+                    modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                ) {
+                    QrCodeScannerScreen(navController)
                 }
             }
             composable(BottomNavItemAdmin.Data.route) {

@@ -11,6 +11,7 @@ import com.dev.sirasa.data.remote.response.booking.BookingSummaryResponse
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
+import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
@@ -112,12 +113,12 @@ interface ApiService {
     @PUT("bookings/{id}/cancel")
     suspend fun cancelBooking(
         @Path("id") id: String
-    ) : BookingUserResponse
+    ) : BookingValidationResponse
 
     @PUT("bookings/{id}/done")
     suspend fun validationBooking(
         @Path("id") id: String
-    ) : BookingUserResponse
+    ) : BookingValidationResponse
 
     @GET("bookings/summary")
     suspend fun bookingSummary(

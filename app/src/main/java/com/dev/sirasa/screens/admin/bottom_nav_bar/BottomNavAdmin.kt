@@ -67,7 +67,13 @@ fun BottomNavAdmin(navController: NavController) {
             }
         }
         FloatingActionButton(
-            onClick = { /* Handle Scan QR Click */ },
+            onClick = {
+                navController.navigate(BottomNavItemAdmin.ScanQr.route) {
+                    popUpTo(BottomNavItemAdmin.ScanQr.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+
+            },
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 8.dp),
