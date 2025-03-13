@@ -297,7 +297,7 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                 Box(
                     modifier = Modifier.padding(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
                 ) {
-                    DataScreen()
+                    DataScreen(navController)
                 }
             }
             composable(BottomNavItemAdmin.Profile.route) {

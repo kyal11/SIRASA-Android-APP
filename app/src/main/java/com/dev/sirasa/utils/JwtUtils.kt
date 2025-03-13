@@ -16,6 +16,17 @@ object JwtUtils {
             null
         }
     }
+    fun getUserId(token: String?): String? {
+        return try {
+            token?.let {
+                val jwt = JWT(it)
+                jwt.getClaim("userId").asString()
+            }
+        } catch (e: Exception) {
+            Log.e("JwtUtils", "Error decoding JWT: ${e.message}")
+            null
+        }
+    }
 
     fun getEmail(token: String?): String? {
         return try {

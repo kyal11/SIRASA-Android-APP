@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.Green600
+import com.dev.sirasa.ui.theme.Green700
 import com.dev.sirasa.ui.theme.Green800
 import com.dev.sirasa.ui.theme.Green900
 import com.dev.sirasa.utils.QRCodeAnalyzer
@@ -216,7 +217,7 @@ fun QrCodeScannerScreen(
                             Text(
                                 "Booking Valid!",
                                 style = MaterialTheme.typography.titleLarge,
-                                color = Color.Green
+                                color = Green700
                             )
                             Spacer(modifier = Modifier.height(8.dp))
 
@@ -239,7 +240,7 @@ fun QrCodeScannerScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleLarge,
-                                color = Color.Green
+                                color = Green700
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(date, textAlign = TextAlign.End, style = MaterialTheme.typography.displayMedium, color = Green800, modifier = Modifier.fillMaxWidth())

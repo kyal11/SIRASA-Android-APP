@@ -12,6 +12,7 @@ import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
+import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
@@ -48,22 +49,22 @@ interface ApiService {
     @POST("login")
     suspend fun login(
         @Field("email") email: String?,
-        @Field("nim") nim:String?,
+        @Field("nim") nim: String?,
         @Field("password") password: String,
         @Field("deviceToken") deviceToken: String,
-    ) : LoginResponse
+    ): LoginResponse
 
     @POST("logout")
-    suspend fun logout() : LogoutResponse
+    suspend fun logout(): LogoutResponse
 
     @POST("refresh-token")
-    suspend fun refreshToken() : RefreshTokenResponse
+    suspend fun refreshToken(): RefreshTokenResponse
 
     @FormUrlEncoded
     @POST("send-email-reset-password")
     suspend fun sendEmailPassword(
         @Field("email") email: String
-    ) : EmailResetPasswordResponse
+    ): EmailResetPasswordResponse
 
     @FormUrlEncoded
     @POST("reset-password")
@@ -71,13 +72,13 @@ interface ApiService {
         @Query("token") token: String,
         @Field("password") password: String,
         @Field("passwordConfirm") passwordConfirm: String
-    ) : EmailResetPasswordResponse
+    ): EmailResetPasswordResponse
 
     @FormUrlEncoded
     @POST("send-validate-email")
     suspend fun sendEmailVerified(
         @Field("email") email: String
-    ) : EmailVerifiedResponse
+    ): EmailVerifiedResponse
 
     @GET("validate-email")
     suspend fun validateEmail(@Query("token") token: String): EmailVerifiedResponse
@@ -85,7 +86,7 @@ interface ApiService {
 
     // Room & Slot
     @GET("rooms")
-    suspend fun getAllRoom() : RoomResponse
+    suspend fun getAllRoom(): RoomResponse
 
     @GET("rooms/{id}")
     suspend fun getRoomDetail(
@@ -102,40 +103,40 @@ interface ApiService {
     @POST("bookings")
     suspend fun createBooking(
         @Body request: CreateBookingRequest
-    ) : Any
+    ): Any
 
     @GET("bookings/history")
-    suspend fun getBookingHistory() : BookingUserResponse
+    suspend fun getBookingHistory(): BookingUserResponse
 
     @GET("bookings/history/active")
-    suspend fun getBookingActive() : BookingUserResponse
+    suspend fun getBookingActive(): BookingUserResponse
 
     @PUT("bookings/{id}/cancel")
     suspend fun cancelBooking(
         @Path("id") id: String
-    ) : BookingValidationResponse
+    ): BookingValidationResponse
 
     @PUT("bookings/{id}/done")
     suspend fun validationBooking(
         @Path("id") id: String
-    ) : BookingValidationResponse
+    ): BookingValidationResponse
 
     @GET("bookings/summary")
     suspend fun bookingSummary(
         @Query("day") day: String? = null
-    ) : BookingSummaryResponse
+    ): BookingSummaryResponse
 
     //Users
     @GET("users")
-    suspend fun getAllUser() : GetUserResponse
+    suspend fun getAllUser(): GetUserResponse
 
     @GET("users/{id}")
     suspend fun getUserById(
         @Path("id") id: String
-    ) : GetDetailUserResponse
+    ): GetDetailUserResponse
 
     @GET("users/detail")
-    suspend fun getDetailUser() : GetDetailUserResponse
+    suspend fun getDetailUser(): GetDetailUserResponse
 
     @Multipart
     @PUT("users")
@@ -146,5 +147,9 @@ interface ApiService {
     @PUT("users/{id}")
     suspend fun updateUsers(
         @Body request: UpdateAccount
-    ) : GetDetailUserResponse
+    ): GetDetailUserResponse
+
+
+    @GET("crm/summary")
+    suspend fun summaryData(): SummaryDataResponse
 }

@@ -2,6 +2,8 @@ package com.dev.sirasa.screens.user.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.sirasa.data.local.UserPreference
+import com.dev.sirasa.data.remote.WebSocketManager
 import com.dev.sirasa.data.remote.response.booking.DataHistory
 import com.dev.sirasa.data.remote.response.room.DataRoom
 import com.dev.sirasa.data.remote.response.room.DataRoomDetail
@@ -20,7 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoryMainModel @Inject constructor(
-    private val bookingRepository: BookingRepository
+    private val bookingRepository: BookingRepository,
+    private val userPreference: UserPreference
 ) : ViewModel() {
     private val _history= MutableStateFlow<List<DataHistory>>(emptyList())
     val history: StateFlow<List<DataHistory>> = _history.asStateFlow()
@@ -39,6 +42,22 @@ class HistoryMainModel @Inject constructor(
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            WebSocketManager.connect { userPreference.getSession() }
+        }
+        viewModelScope.launch {
+            WebSocketManager.bookingUpdateFlow.collect {
+                refreshHistory()
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        WebSocketManager.disconnect()
+    }
 
     fun refreshHistory() {
         viewModelScope.launch {

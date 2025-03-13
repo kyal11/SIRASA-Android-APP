@@ -75,6 +75,10 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation("io.socket:socket.io-client:2.1.0"){
+        exclude(group= "org.json", module= "json")
+    }
+
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)

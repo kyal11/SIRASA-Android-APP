@@ -68,11 +68,15 @@ fun BottomNavAdmin(navController: NavController) {
         }
         FloatingActionButton(
             onClick = {
-                navController.navigate(BottomNavItemAdmin.ScanQr.route) {
-                    popUpTo(BottomNavItemAdmin.ScanQr.route) { inclusive = true }
-                    launchSingleTop = true
+                if (currentRoute != BottomNavItemAdmin.ScanQr.route) {
+                    navController.navigate(BottomNavItemAdmin.ScanQr.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-
             },
             modifier = Modifier
                 .align(Alignment.TopCenter)

@@ -1,5 +1,6 @@
 package com.dev.sirasa.data.repository
 
+import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
 import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
 import com.dev.sirasa.data.remote.response.user.UpdateAccount
 import com.dev.sirasa.data.remote.retrofit.ApiService
@@ -47,5 +48,9 @@ class UsersRepository @Inject constructor(
         }
 
         emit(apiService.updateAccount(parts))
+    }
+
+    suspend fun getSummary(): Flow<SummaryDataResponse> = flow {
+        emit(apiService.summaryData())
     }
 }
