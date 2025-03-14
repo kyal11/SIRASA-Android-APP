@@ -1,6 +1,11 @@
 package com.dev.sirasa.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.dev.sirasa.data.remote.paging.UsersPagingSource
 import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
+import com.dev.sirasa.data.remote.response.user.DataUser
 import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
 import com.dev.sirasa.data.remote.response.user.UpdateAccount
 import com.dev.sirasa.data.remote.retrofit.ApiService
@@ -52,5 +57,17 @@ class UsersRepository @Inject constructor(
 
     suspend fun getSummary(): Flow<SummaryDataResponse> = flow {
         emit(apiService.summaryData())
+    }
+    fun getPaginatedUsers(
+        searchQuery: String? = null,
+        role: String? = null
+    ): Flow<PagingData<DataUser>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 3,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { UsersPagingSource(apiService, searchQuery, role) }
+        ).flow
     }
 }

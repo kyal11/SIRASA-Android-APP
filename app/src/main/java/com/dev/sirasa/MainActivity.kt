@@ -62,6 +62,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import com.dev.sirasa.screens.admin.data.DataUserScreen
 import com.dev.sirasa.screens.admin.qr_code_booking.QrCodeScannerScreen
 import com.dev.sirasa.screens.user.history.MoreBookingScreen
 import com.dev.sirasa.screens.user.history.MoreHistoryScreen
@@ -262,10 +263,19 @@ fun MainScreenUser(snackbarHostState: SnackbarHostState) {
 @Composable
 fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val routesWithoutBottomBar = listOf("data_users")
 
+    // Check if bottom bar should be shown for current route
+    val showBottomBar = currentRoute !in routesWithoutBottomBar
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { BottomNavAdmin(navController) }
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavAdmin(navController)
+            }
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -308,6 +318,8 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                 }
             }
             composable("auth_screen") { AuthScreen(snackbarHostState) }
+
+            composable("data_users") { DataUserScreen(navController, snackbarHostState, onBack = { navController.popBackStack() }) }
         }
     }
 }

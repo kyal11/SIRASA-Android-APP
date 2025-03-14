@@ -16,6 +16,7 @@ import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
+import com.dev.sirasa.data.remote.response.user.GetAllUsersPaginateResponse
 import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
 import com.dev.sirasa.data.remote.response.user.GetUserResponse
 import com.dev.sirasa.data.remote.response.user.UpdateAccount
@@ -127,8 +128,13 @@ interface ApiService {
     ): BookingSummaryResponse
 
     //Users
-    @GET("users")
-    suspend fun getAllUser(): GetUserResponse
+    @GET("users/paginate")
+    suspend fun getAllUsersPaginate(
+        @Query("page") page: Int = 1,
+        @Query("perPage") perPage: Int = 10,
+        @Query("search") search: String? = null,
+        @Query("role") role: String? = null
+    ): GetAllUsersPaginateResponse
 
     @GET("users/{id}")
     suspend fun getUserById(

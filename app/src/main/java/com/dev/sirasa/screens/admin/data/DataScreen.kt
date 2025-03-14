@@ -1,6 +1,7 @@
 package com.dev.sirasa.screens.admin.data
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -95,6 +96,7 @@ fun DataScreen(navController: NavController, viewModel: DataViewModel = hiltView
                             "Admin" to data.user?.totalRoleAdmin.toString(),
                             "Pengguna" to data.user?.totalRoleUser.toString()
                         ),
+                        onClick = { navController.navigate("data_users") }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -194,11 +196,12 @@ fun BookingDataRow(status: String, count: String) {
 
 
 @Composable
-fun CardDataUser(title: String, total: String, userData: List<Pair<String, String>>) {
+fun CardDataUser(title: String, total: String, userData: List<Pair<String, String>>, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -310,21 +313,21 @@ fun RoomDataRow(name: String, capacity: String, time: String) {
         Text(text = time, style = Typography.bodyMedium, modifier = Modifier.weight(2f), textAlign = TextAlign.End)
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun PreviewCardScreen() {
-    SirasaTheme {
-        CardDataUser(
-            title = "Data Pengguna",
-            total = "100",
-            userData = listOf(
-                "Super Admin" to "10",
-                "Admin" to "10",
-                "Pengguna" to "10"
-            )
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewCardScreen() {
+//    SirasaTheme {
+//        CardDataUser(
+//            title = "Data Pengguna",
+//            total = "100",
+//            userData = listOf(
+//                "Super Admin" to "10",
+//                "Admin" to "10",
+//                "Pengguna" to "10"
+//            )
+//        )
+//    }
+//}
 
 //@Preview(showBackground = true)
 //@Composable

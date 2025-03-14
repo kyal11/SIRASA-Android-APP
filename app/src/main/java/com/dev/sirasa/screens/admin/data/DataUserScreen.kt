@@ -4,68 +4,169 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import com.dev.sirasa.R
+import com.dev.sirasa.data.remote.response.user.DataUser
+import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataUserScreen() {
+fun DataUserScreen(
+    navController: NavController,
+    snackbarHostState: SnackbarHostState,
+    viewModel: DataViewModel = hiltViewModel(),
+    onBack: () -> Unit
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("All") }
-    val roles = listOf("All","Super Admin", "Admin", "User")
-    val users = listOf(
-        UserData("John Doe", "12345678", "08123456789", R.drawable.perpus_logo),
-        UserData("Jane Smith", "87654321", "08987654321", R.drawable.perpus_logo),
-        UserData("Alice Johnson", "11223344", "08567891234", R.drawable.perpus_logo)
-    )
+    val roles = listOf("All", "Super Admin", "Admin", "User")
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        InputFieldSearch(
-            label = "Search",
-            placeHolder = "Enter name",
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.fillMaxWidth()
-        )
+    val users = viewModel.usersState.collectAsLazyPagingItems()
 
-        // Role Filter
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            roles.forEach { role ->
-                Button(
-                    onClick = { selectedRole = role },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedRole == role) MaterialTheme.colorScheme.primary else Color.White ,
-                        contentColor = if (selectedRole == role) Color.White else Color.Black
-                    ),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-                ) {
-                    Text(text = role)
+    LaunchedEffect(searchQuery, selectedRole) {
+        val roleFilter = when (selectedRole) {
+            "Super Admin" -> "superadmin"
+            "Admin" -> "admin"
+            "User" -> "user"
+            else -> null
+        }
+        viewModel.getUsers(searchQuery, roleFilter)
+    }
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Data Users",
+                        style = Typography.titleMedium
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .consumeWindowInsets(innerPadding)
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            InputFieldSearch(
+                label = "Search",
+                placeHolder = "Enter name",
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Role Filter
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                roles.forEach { role ->
+                    Button(
+                        onClick = { selectedRole = role },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedRole == role) MaterialTheme.colorScheme.primary else Color.White,
+                            contentColor = if (selectedRole == role) Color.White else Color.Black
+                        ),
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    ) {
+                        Text(text = role)
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // User List
-        users.forEach { user ->
-            CardUser(user)
+            // User List menggunakan Paging3
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(users.itemCount) { index ->
+                    val user = users[index]
+                    if (user != null) {
+                        CardUser(user)
+                    }
+                }
+
+                // Loading & Error States
+                users.apply {
+                    when {
+                        loadState.refresh is LoadState.Loading -> {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    LoadingCircular(
+                                        true,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+
+                        loadState.append is LoadState.Loading -> {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    LoadingCircular(
+                                        true,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+
+                        loadState.refresh is LoadState.Error -> {
+                            val error = (loadState.refresh as LoadState.Error).error
+                            item {
+                                Text(
+                                    text = "Error: ${error.message}",
+                                    color = Color.Red,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -93,30 +194,45 @@ fun InputFieldSearch(label: String, placeHolder: String, value: String, onValueC
     Spacer(modifier = Modifier.height(8.dp))
 }
 @Composable
-fun CardUser(user: UserData) {
+fun CardUser(user: DataUser) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(8.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
     ) {
         Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Image(painter = painterResource(id = user.imageRes), contentDescription = "Profile Image", modifier = Modifier.size(50.dp))
+            if (user?.imageUrl != null) {
+                AsyncImage(
+                    model = "https://sirasa.teamteaguard.com${user?.imageUrl}",
+                    contentDescription = "Photo Profile",
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(180.dp))
+                        .size(50.dp),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.profile_user),
+                    error = painterResource(R.drawable.profile_user)
+                )
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.profile_user),
+                    contentDescription = "Photo Profile",
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(180.dp))
+                        .size(50.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = user.name, style = Typography.titleMedium)
-                Text(text = "NIM: ${user.nim}", style = Typography.bodyMedium)
-                Text(text = "Phone: ${user.phone}", style = Typography.bodyMedium)
+                Text(text = user.name ?: "No Name", style = Typography.titleMedium)
+                Text(text = "NIM: ${user.nim ?: "-"}", style = Typography.bodyMedium)
+                Text(text = "Phone: ${user.phoneNumber ?: "-"}", style = Typography.bodyMedium)
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewDataUserScreen() {
-    SirasaTheme{
-        DataUserScreen()
-    }
-}
 
 data class UserData(val name: String, val nim: String, val phone: String, val imageRes: Int)
