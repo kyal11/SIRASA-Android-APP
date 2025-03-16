@@ -180,6 +180,7 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             Spacer(modifier = Modifier.height(8.dp))
 
             DropdownField(
+                "Ruangan",
                 options = rooms.map { it.name },
                 selectedOption = selectedRoomName,
                 onOptionSelected = { selectedName ->

@@ -1,13 +1,20 @@
 package com.dev.sirasa.data.repository
 
 import android.util.Log
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.dev.sirasa.data.remote.paging.BookingPagingSource
+import com.dev.sirasa.data.remote.paging.UsersPagingSource
 import com.dev.sirasa.data.remote.response.booking.BookingSummaryResponse
 import com.dev.sirasa.data.remote.retrofit.ApiService
 import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
+import com.dev.sirasa.data.remote.response.booking.DataBooking
 import com.dev.sirasa.data.remote.response.booking.RecommendationResponse
+import com.dev.sirasa.data.remote.response.user.DataUser
 import com.dev.sirasa.screens.user.home.BookingResult
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -24,20 +31,16 @@ class BookingRepository @Inject constructor(
             val response = apiService.createBooking(request)
             Log.d("BookingRepository", "Response diterima: $response")
 
-            // Inisialisasi Gson
             val gson = Gson()
 
-            // Mengonversi respons menjadi JsonObject
             val jsonStr = gson.toJson(response)
             val jsonObject = gson.fromJson(jsonStr, JsonObject::class.java)
 
-            // Mendapatkan nilai status
             val status = if (jsonObject.has("status")) jsonObject.get("status").asString else null
 
             when (status) {
                 "success" -> {
                     try {
-                        // Konversi langsung ke CreateBookingResponse
                         val bookingResponse = gson.fromJson(jsonStr, CreateBookingResponse::class.java)
                         emit(BookingResult.Success(bookingResponse))
                     } catch (e: Exception) {
@@ -47,7 +50,6 @@ class BookingRepository @Inject constructor(
                 }
                 "recommendation" -> {
                     try {
-                        // Konversi langsung ke RecommendationResponse
                         val recommendResponse = gson.fromJson(jsonStr, RecommendationResponse::class.java)
                         emit(BookingResult.Recommendation(recommendResponse))
                     } catch (e: Exception) {
@@ -56,7 +58,6 @@ class BookingRepository @Inject constructor(
                     }
                 }
                 else -> {
-                    // Menangani kasus status tidak dikenal atau null
                     val message = if (jsonObject.has("message"))
                         jsonObject.get("message").asString
                     else
@@ -69,6 +70,20 @@ class BookingRepository @Inject constructor(
             Log.e("BookingRepository", "Error terjadi: ${e.message}", e)
             emit(BookingResult.Error(e.message ?: "Terjadi kesalahan"))
         }
+    }
+    fun getPaginatedBookings(
+        searchQuery: String? = null,
+        startDate: String? = null,
+        endDate: String? = null,
+        status: String? = null
+    ): Flow<PagingData<DataBooking>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { BookingPagingSource(apiService, searchQuery, startDate, endDate, status) }
+        ).flow
     }
 
     fun getHistoryBookingUser():Flow<BookingUserResponse> = flow {

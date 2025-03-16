@@ -6,4 +6,17 @@ data class UpdateAccount (
     val phoneNumber: String? = null,
     val imageUrl: Any? = null,
     val password: String? = null,
+    val verified: Boolean? = null,
+    val role: String? = null,
+    val email: String? = null
+)
+
+data class CreateUser(
+    val name: String,
+    val email: String,
+    val password: String,
+    val nim: String,
+    val phoneNumber: String,
+    val verified: Boolean,
+    val role: String? = "user"
 )

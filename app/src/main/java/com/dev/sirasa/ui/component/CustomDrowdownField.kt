@@ -20,6 +20,7 @@ import com.dev.sirasa.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownField(
+    label: String,
     options: List<String>,
     selectedOption: String?,
     onOptionSelected: (String) -> Unit,
@@ -29,7 +30,7 @@ fun DropdownField(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Ruangan",
+            text = label,
             style = Typography.displayMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -82,16 +83,16 @@ fun DropdownField(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewDropdownField() {
-    SirasaTheme {
-        var selected by remember { mutableStateOf<String?>(null) }
-
-        DropdownField(
-            options = listOf("Option 1", "Option 2", "Option 3"),
-            selectedOption = selected,
-            onOptionSelected = { selected = it }
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewDropdownField() {
+//    SirasaTheme {
+//        var selected by remember { mutableStateOf<String?>(null) }
+//
+//        DropdownField(
+//            options = listOf("Option 1", "Option 2", "Option 3"),
+//            selectedOption = selected,
+//            onOptionSelected = { selected = it }
+//        )
+//    }
+//}

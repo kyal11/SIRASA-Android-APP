@@ -38,7 +38,6 @@ fun ProfileScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
     viewModel: ProfileViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel()
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -59,9 +58,6 @@ fun ProfileScreen(
     LaunchedEffect(profileState) {
         Log.d("Logout", "Current profileState: $profileState")
         when (profileState) {
-            is ProfileState.Success -> {
-                mainViewModel.checkUserSession()
-            }
             is ProfileState.Error -> {
                 val errorMessage = (profileState as ProfileState.Error).message
                 snackbarHostState.showSnackbar(message = errorMessage, actionLabel = "OK")

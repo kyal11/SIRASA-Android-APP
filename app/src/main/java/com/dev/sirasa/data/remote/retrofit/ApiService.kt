@@ -12,16 +12,20 @@ import com.dev.sirasa.data.remote.response.booking.CreateBookingRequest
 import com.dev.sirasa.data.remote.response.booking.CreateBookingResponse
 import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
+import com.dev.sirasa.data.remote.response.booking.GetBookingsPaginateResponse
 import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
+import com.dev.sirasa.data.remote.response.user.CreateUser
+import com.dev.sirasa.data.remote.response.user.DeleteUserResponse
 import com.dev.sirasa.data.remote.response.user.GetAllUsersPaginateResponse
 import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
 import com.dev.sirasa.data.remote.response.user.GetUserResponse
 import com.dev.sirasa.data.remote.response.user.UpdateAccount
 import okhttp3.MultipartBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -101,6 +105,17 @@ interface ApiService {
     ): RoomWithSlotResponse
 
     // Booking
+
+    @GET("bookings/paginate")
+    suspend fun getBookingsPaginate(
+        @Query("page") page: Int = 1,
+        @Query("perPage") perPage: Int = 10,
+        @Query("search") search: String? = null,
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null,
+        @Query("status") status: String? = null
+    ): GetBookingsPaginateResponse
+
     @POST("bookings")
     suspend fun createBooking(
         @Body request: CreateBookingRequest
@@ -144,17 +159,35 @@ interface ApiService {
     @GET("users/detail")
     suspend fun getDetailUser(): GetDetailUserResponse
 
+    @POST("users")
+    suspend fun createUsers(
+        @Body createUser: CreateUser
+    ): GetDetailUserResponse
+
+
     @Multipart
     @PUT("users")
     suspend fun updateAccount(
         @Part parts: List<MultipartBody.Part>
     ): GetDetailUserResponse
 
+    @Multipart
     @PUT("users/{id}")
     suspend fun updateUsers(
-        @Body request: UpdateAccount
+        @Path("id") id: String,
+        @Part parts: List<MultipartBody.Part>
     ): GetDetailUserResponse
 
+    @PUT("users/{id}")
+    suspend fun updateUsersVerified(
+        @Path("id") id: String,
+        @Body updateDate: UpdateAccount
+    ): GetDetailUserResponse
+
+    @DELETE("users/{id}")
+    suspend fun deleteUsers(
+        @Path("id") id: String
+    ): DeleteUserResponse
 
     @GET("crm/summary")
     suspend fun summaryData(): SummaryDataResponse

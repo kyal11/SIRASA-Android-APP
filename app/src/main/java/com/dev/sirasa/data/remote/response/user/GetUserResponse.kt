@@ -25,6 +25,17 @@ data class GetDetailUserResponse(
 	val status: String? = null
 )
 
+data class DeleteUserResponse(
+
+	@field:SerializedName("data")
+	val data: String? = null,
+
+	@field:SerializedName("message")
+	val message: String? = null,
+
+	@field:SerializedName("status")
+	val status: String? = null
+)
 data class DeviceTokensItem(
 
 	@field:SerializedName("createdAt")

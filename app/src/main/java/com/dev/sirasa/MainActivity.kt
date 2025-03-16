@@ -21,12 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.*
-import kotlinx.serialization.json.*
 import androidx.navigation.navDeepLink
 import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavAdmin
 import com.dev.sirasa.screens.admin.bottom_nav_bar.BottomNavItemAdmin
@@ -45,13 +43,9 @@ import com.dev.sirasa.screens.user.home.UserHomeScreen
 import com.dev.sirasa.screens.user.room.UserRoomScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
 import dagger.hilt.android.AndroidEntryPoint
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,13 +54,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.toRoute
-import com.dev.sirasa.screens.admin.data.DataUserScreen
+import androidx.navigation.navArgument
+import com.dev.sirasa.screens.admin.data.user.AddUserScreen
+import com.dev.sirasa.screens.admin.data.user.DataUserScreen
+import com.dev.sirasa.screens.admin.data.user.DetailUserScreen
 import com.dev.sirasa.screens.admin.qr_code_booking.QrCodeScannerScreen
 import com.dev.sirasa.screens.user.history.MoreBookingScreen
 import com.dev.sirasa.screens.user.history.MoreHistoryScreen
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -265,10 +261,14 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val routesWithoutBottomBar = listOf("data_users")
 
-    // Check if bottom bar should be shown for current route
+    val routesWithoutBottomBar = listOf(
+        RoutesAdmin.DataUsers,
+        RoutesAdmin.AddUser,
+        RoutesAdmin.ProfileDetail
+    )
     val showBottomBar = currentRoute !in routesWithoutBottomBar
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -317,9 +317,30 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                     ProfileScreen(navController, snackbarHostState)
                 }
             }
-            composable("auth_screen") { AuthScreen(snackbarHostState) }
 
-            composable("data_users") { DataUserScreen(navController, snackbarHostState, onBack = { navController.popBackStack() }) }
+            composable(RoutesAdmin.AuthScreen) { AuthScreen(snackbarHostState) }
+            composable(RoutesAdmin.DataUsers) {
+                DataUserScreen(navController, snackbarHostState) { navController.popBackStack() }
+            }
+            composable(RoutesAdmin.AddUser) {
+                AddUserScreen(navController, snackbarHostState, onBack = { navController.popBackStack() })
+            }
+            composable(
+                RoutesAdmin.ProfileDetail,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")
+                userId?.let {
+                    DetailUserScreen(navController,snackbarHostState, userId, onBack = { navController.popBackStack() })
+                }
+            }
         }
     }
+}
+
+object RoutesAdmin {
+    const val AuthScreen = "auth_screen"
+    const val DataUsers = "data_users"
+    const val AddUser = "add_user"
+    const val ProfileDetail = "profile/{userId}"
 }

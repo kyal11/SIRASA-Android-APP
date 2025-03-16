@@ -1,16 +1,16 @@
-package com.dev.sirasa.screens.admin.data
+package com.dev.sirasa.screens.admin.data.user
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,13 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
@@ -32,8 +29,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.dev.sirasa.R
 import com.dev.sirasa.data.remote.response.user.DataUser
+import com.dev.sirasa.screens.admin.data.DataViewModel
 import com.dev.sirasa.ui.component.LoadingCircular
-import com.dev.sirasa.ui.theme.SirasaTheme
+import com.dev.sirasa.ui.theme.Green700
 import com.dev.sirasa.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +58,7 @@ fun DataUserScreen(
         viewModel.getUsers(searchQuery, roleFilter)
     }
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -77,95 +76,114 @@ fun DataUserScreen(
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .consumeWindowInsets(innerPadding)
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            InputFieldSearch(
-                label = "Search",
-                placeHolder = "Enter name",
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Role Filter
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                roles.forEach { role ->
-                    Button(
-                        onClick = { selectedRole = role },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedRole == role) MaterialTheme.colorScheme.primary else Color.White,
-                            contentColor = if (selectedRole == role) Color.White else Color.Black
-                        ),
-                        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-                    ) {
-                        Text(text = role)
+                InputFieldSearch(
+                    label = "Search",
+                    placeHolder = "Enter name",
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Role Filter
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    roles.forEach { role ->
+                        Button(
+                            onClick = { selectedRole = role },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (selectedRole == role) MaterialTheme.colorScheme.primary else Color.White,
+                                contentColor = if (selectedRole == role) Color.White else Color.Black
+                            ),
+                            border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                        ) {
+                            Text(text = role)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // User List menggunakan Paging3
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(users.itemCount) { index ->
+                        val user = users[index]
+                        if (user != null) {
+                            CardUser(user,onClick = {
+                                navController.navigate("profile/${user.id}")
+                            })
+                        }
+                    }
+
+                    // Loading & Error States
+                    users.apply {
+                        when {
+                            loadState.refresh is LoadState.Loading -> {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        LoadingCircular(
+                                            true,
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+                                    }
+                                }
+                            }
+
+                            loadState.append is LoadState.Loading -> {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        LoadingCircular(
+                                            true,
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+                                    }
+                                }
+                            }
+
+                            loadState.refresh is LoadState.Error -> {
+                                val error = (loadState.refresh as LoadState.Error).error
+                                item {
+                                    Text(
+                                        text = "Error: ${error.message}",
+                                        color = Color.Red,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // User List menggunakan Paging3
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(users.itemCount) { index ->
-                    val user = users[index]
-                    if (user != null) {
-                        CardUser(user)
-                    }
-                }
-
-                // Loading & Error States
-                users.apply {
-                    when {
-                        loadState.refresh is LoadState.Loading -> {
-                            item {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    LoadingCircular(
-                                        true,
-                                        modifier = Modifier.align(Alignment.Center)
-                                    )
-                                }
-                            }
-                        }
-
-                        loadState.append is LoadState.Loading -> {
-                            item {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    LoadingCircular(
-                                        true,
-                                        modifier = Modifier.align(Alignment.Center)
-                                    )
-                                }
-                            }
-                        }
-
-                        loadState.refresh is LoadState.Error -> {
-                            val error = (loadState.refresh as LoadState.Error).error
-                            item {
-                                Text(
-                                    text = "Error: ${error.message}",
-                                    color = Color.Red,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+            FloatingActionButton(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 12.dp, end = 12.dp),
+                onClick = {navController.navigate("add_user")},
+                containerColor = Color.White,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    modifier = Modifier.size(32.dp),
+                    tint = Green700
+                )
             }
         }
     }
@@ -194,9 +212,9 @@ fun InputFieldSearch(label: String, placeHolder: String, value: String, onValueC
     Spacer(modifier = Modifier.height(8.dp))
 }
 @Composable
-fun CardUser(user: DataUser) {
+fun CardUser(user: DataUser, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(8.dp).clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
@@ -233,6 +251,3 @@ fun CardUser(user: DataUser) {
         }
     }
 }
-
-
-data class UserData(val name: String, val nim: String, val phone: String, val imageRes: Int)
