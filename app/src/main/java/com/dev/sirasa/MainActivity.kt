@@ -57,6 +57,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.dev.sirasa.screens.admin.data.booking.AddBookingScreen
+import com.dev.sirasa.screens.admin.data.booking.DataBookingScreen
+import com.dev.sirasa.screens.admin.data.room.AddRoomScreen
+import com.dev.sirasa.screens.admin.data.room.DataRoomScreen
+import com.dev.sirasa.screens.admin.data.room.EditRoomScreen
 import com.dev.sirasa.screens.admin.data.user.AddUserScreen
 import com.dev.sirasa.screens.admin.data.user.DataUserScreen
 import com.dev.sirasa.screens.admin.data.user.DetailUserScreen
@@ -265,7 +270,13 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
     val routesWithoutBottomBar = listOf(
         RoutesAdmin.DataUsers,
         RoutesAdmin.AddUser,
-        RoutesAdmin.ProfileDetail
+        RoutesAdmin.ProfileDetail,
+        RoutesAdmin.DataBookings,
+        RoutesAdmin.AddBooking,
+        RoutesAdmin.dashboardBooking,
+        RoutesAdmin.DataRooms,
+        RoutesAdmin.AddRoom,
+        RoutesAdmin.EditRoom
     )
     val showBottomBar = currentRoute !in routesWithoutBottomBar
 
@@ -334,6 +345,46 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                     DetailUserScreen(navController,snackbarHostState, userId, onBack = { navController.popBackStack() })
                 }
             }
+            composable(RoutesAdmin.DataBookings) {
+                DataBookingScreen(navController, snackbarHostState, onBack = {navController.popBackStack()})
+            }
+            composable(RoutesAdmin.AddBooking) {
+                AddBookingScreen(navController, snackbarHostState, { navController.popBackStack() })
+            }
+            composable(
+                "dataBooking/{startDate}/{endDate}/{status}",
+                arguments = listOf(
+                    navArgument("startDate") { type = NavType.StringType },
+                    navArgument("endDate") { type = NavType.StringType },
+                    navArgument("status") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val startDate = backStackEntry.arguments?.getString("startDate") ?: ""
+                val endDate = backStackEntry.arguments?.getString("endDate") ?: ""
+                val status = backStackEntry.arguments?.getString("status") ?: "all"
+
+                DataBookingScreen(
+                    navController = navController,
+                    snackbarHostState = remember { SnackbarHostState() },
+                    onBack = { navController.popBackStack() },
+                    startDate = startDate,
+                    endDate = endDate,
+                    status = status
+                )
+            }
+            composable(RoutesAdmin.DataRooms) {
+                DataRoomScreen(navController, snackbarHostState, onBack = { navController.popBackStack() })
+            }
+            composable(RoutesAdmin.AddRoom) {
+                AddRoomScreen(navController, snackbarHostState, onBack = { navController.popBackStack() })
+            }
+            composable(
+                RoutesAdmin.EditRoom,
+                arguments = listOf(navArgument("roomId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val roomId = backStackEntry.arguments?.getString("roomId") ?: ""
+                EditRoomScreen(navController, snackbarHostState ,roomId, onBack = { navController.popBackStack() })
+            }
         }
     }
 }
@@ -343,4 +394,10 @@ object RoutesAdmin {
     const val DataUsers = "data_users"
     const val AddUser = "add_user"
     const val ProfileDetail = "profile/{userId}"
+    const val DataBookings = "data_bookings"
+    const val AddBooking = "add_booking"
+    const val dashboardBooking = "dataBooking/{startDate}/{endDate}/{status}"
+    const val DataRooms = "data_rooms"
+    const val AddRoom = "add_room"
+    const val EditRoom = "edit_room/{roomId}"
 }

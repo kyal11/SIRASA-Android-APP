@@ -14,7 +14,10 @@ import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
 import com.dev.sirasa.data.remote.response.booking.GetBookingsPaginateResponse
 import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
+import com.dev.sirasa.data.remote.response.room.CreateRoomResponse
+import com.dev.sirasa.data.remote.response.room.DeletedRoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
+import com.dev.sirasa.data.remote.response.room.RoomModel
 import com.dev.sirasa.data.remote.response.room.RoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomWithSlotResponse
 import com.dev.sirasa.data.remote.response.user.CreateUser
@@ -24,6 +27,8 @@ import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
 import com.dev.sirasa.data.remote.response.user.GetUserResponse
 import com.dev.sirasa.data.remote.response.user.UpdateAccount
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.Field
@@ -96,7 +101,7 @@ interface ApiService {
     @GET("rooms/{id}")
     suspend fun getRoomDetail(
         @Path("id") id: String,
-        @Query("day") day: String
+        @Query("day") day: String? = null
     ): RoomDetailResponse
 
     @GET("rooms/slots")
@@ -104,6 +109,22 @@ interface ApiService {
         @Query("day") day: String
     ): RoomWithSlotResponse
 
+    @POST("rooms/slots")
+    suspend fun createRoom(
+        @Body roomModel: RoomModel
+    ): CreateRoomResponse
+
+    @PUT("rooms/{id}")
+    suspend fun updatedRoom(
+        @Path("id") id: String,
+        @Body roomModel: RoomModel
+    ): CreateRoomResponse
+
+
+    @DELETE("rooms/{id}")
+    suspend fun deletedRoom(
+        @Path("id") id: String,
+    ): DeletedRoomResponse
     // Booking
 
     @GET("bookings/paginate")
@@ -121,6 +142,11 @@ interface ApiService {
         @Body request: CreateBookingRequest
     ): Any
 
+    @POST("bookings/{id}")
+    suspend fun createBookingById(
+        @Path("id") id: String,
+        @Body request: CreateBookingRequest
+    ): Any
     @GET("bookings/history")
     suspend fun getBookingHistory(): BookingUserResponse
 
@@ -189,6 +215,21 @@ interface ApiService {
         @Path("id") id: String
     ): DeleteUserResponse
 
+    // Summary
     @GET("crm/summary")
     suspend fun summaryData(): SummaryDataResponse
+
+    // Export
+    @GET("bookings/export/excel")
+    suspend fun downloadBookingsExcel(
+        @Query("startDate") startDate: String?,
+        @Query("endDate") endDate: String?
+    ): Response<ResponseBody>
+
+    @GET("users/export/excel")
+    suspend fun downloadUsersExcel(
+        @Query("startDate") startDate: String?,
+        @Query("endDate") endDate: String?
+    ): Response<ResponseBody>
+
 }

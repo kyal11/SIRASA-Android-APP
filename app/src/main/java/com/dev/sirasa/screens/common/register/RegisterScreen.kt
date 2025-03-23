@@ -61,14 +61,14 @@ fun RegisterScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.perpus_logo),
+                painter = painterResource(id = R.drawable.logo_sirasa),
                 contentDescription = "Logo Sirasa",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp)
-                    .height(80.dp)
+                    .height(100.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(text = "Daftar Sekarang!", style = Typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))

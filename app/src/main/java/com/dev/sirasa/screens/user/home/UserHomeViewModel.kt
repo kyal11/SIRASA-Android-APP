@@ -115,6 +115,43 @@ class UserViewModel @Inject constructor(
                 }
         }
     }
+
+    fun createBookingById(id: String, request: CreateBookingRequest) {
+        viewModelScope.launch {
+            Log.d("UserViewModel", "Memulai proses booking...")
+            _bookingState.value = BookingState.Loading
+
+            bookingRepository.createBookingById(id, request)
+                .catch { exception ->
+                    Log.e("UserViewModel", "Error dalam booking: ${exception.message}", exception)
+                    _bookingState.value = BookingState.Error(exception.message ?: "Terjadi kesalahan")
+                }
+                .collect { response ->
+                    when (response) {
+                        is BookingResult.Success -> {
+                            val bookingData = response.response.data
+                            if (bookingData != null) {
+                                Log.d("UserViewModel", "Booking sukses: $bookingData")
+                                _bookingState.value = BookingState.Success(bookingData)
+                            } else {
+                                Log.e("UserViewModel", "Data booking tidak ditemukan!")
+                                _bookingState.value = BookingState.Error("Data booking tidak ditemukan")
+                            }
+                        }
+                        is BookingResult.Recommendation -> {
+                            val recommendationData = response.response
+                            Log.d("UserViewModel", "Menerima rekomendasi booking: ${response.response}")
+                            _bookingState.value = BookingState.Recommendation(recommendationData.data, recommendationData.message)
+                        }
+                        is BookingResult.Error -> {
+                            Log.e("UserViewModel", "Booking gagal: ${response.message}")
+                            _bookingState.value = BookingState.Error(response.message)
+                        }
+                        else -> {}
+                    }
+                }
+        }
+    }
     fun resetBookingState() {
         _bookingState.value = BookingState.Idle
     }

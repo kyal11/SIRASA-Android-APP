@@ -149,11 +149,11 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.perpus_logo),
+                painter = painterResource(id = R.drawable.logo_sirasa),
                 contentDescription = "Logo Sirasa",
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(80.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(100.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Selamat Datang di SIRASA",
                 style = Typography.displayLarge

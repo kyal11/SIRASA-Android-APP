@@ -1,6 +1,9 @@
 package com.dev.sirasa.screens.admin.data
 
+import com.dev.sirasa.data.remote.response.booking.DataBooking
+import com.dev.sirasa.data.remote.response.booking.DataBookingsPaginate
 import com.dev.sirasa.data.remote.response.crm.DataCrm
+import com.dev.sirasa.data.remote.response.room.DataRoomDetail
 import com.dev.sirasa.data.remote.response.user.DataUser
 import com.dev.sirasa.data.remote.response.user.GetDetailUserResponse
 
@@ -42,4 +45,25 @@ sealed class UpdateUserState {
     data object Loading : UpdateUserState()
     data object Success : UpdateUserState()
     data class Error(val message: String) : UpdateUserState()
+}
+
+sealed class DataBookingsState {
+    data object Idle : DataBookingsState()
+    data object Loading : DataBookingsState()
+    data class Success(val data: List<DataBookingsPaginate>) : DataBookingsState()
+    data class Error(val message: String) : DataBookingsState()
+}
+
+sealed class DoneBookingState {
+    data object Idle : DoneBookingState()
+    data object Loading : DoneBookingState()
+    data object Success : DoneBookingState()
+    data class Error(val message: String) : DoneBookingState()
+}
+
+sealed class ExportState {
+    data object Idle : ExportState()
+    data object Loading : ExportState()
+    data object Success : ExportState()
+    data class Error(val message: String) : ExportState()
 }

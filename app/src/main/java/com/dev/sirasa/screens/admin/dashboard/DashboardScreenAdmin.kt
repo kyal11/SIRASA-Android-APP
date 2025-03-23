@@ -1,6 +1,7 @@
 package com.dev.sirasa.screens.admin.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -50,18 +52,16 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
     val tabTitles = listOf("Hari Ini", "Besok", "Lusa")
     val dashboardState by viewModel.dashboardState.collectAsState()
 
-    val currentDate = remember {
-        val sdf = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
-        sdf.format(Date())
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale("id", "ID"))
+
+    val selectedDate = remember(selectedOption) {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, selectedOption) // 0 = Hari ini, 1 = Besok, 2 = Lusa
+        dateFormat.format(calendar.time)
     }
 
     LaunchedEffect(selectedOption) {
-        val dayFilter = when (selectedOption) {
-            0 -> "1"
-            1 -> "2"
-            2 -> "3"
-            else -> "1"
-        }
+        val dayFilter = (selectedOption + 1).toString()
         viewModel.getSummaryBooking(dayFilter)
     }
 
@@ -74,7 +74,7 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            currentDate,
+            SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")).format(Date()),
             style = Typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -92,11 +92,51 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
             }
             is DashboardState.Success -> {
                 val data = (dashboardState as DashboardState.Success).data
-                CardDashboard("Total Ruangan", data.data?.totalRooms.toString(), listOf(Color(0xFF3DD043), Color(0xFF3F51B5)))
-                CardDashboard("Total Peminjaman", data.data?.totalBookings.toString(), listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)))
-                CardDashboard("Total Peminjaman Dipesan", data.data?.bookedBookings.toString(), listOf(Color(0xFF36D1DC), Color(0xFF5B86E5)))
-                CardDashboard("Total Peminjaman Selesai", data.data?.doneBookings.toString(), listOf(Color(0xFFFF9800), Color(0xFF8BC34A)))
-                CardDashboard("Total Peminjaman Dibatalkan", data.data?.canceledBookings.toString(), listOf(Color(0xFFFF512F), Color(0xFFDD2476)))
+
+                CardDashboard(
+                    "Total Ruangan",
+                    data.data?.totalRooms.toString(),
+                    listOf(Color(0xFF3DD043), Color(0xFF3F51B5)),
+                    onDetailClick = {
+                        navController.navigate("data_rooms")
+                    }
+                )
+
+                CardDashboard(
+                    title = "Total Peminjaman",
+                    value = data.data?.totalBookings.toString(),
+                    gradientColors = listOf(Color(0xFF00BCD4), Color(0xFF8BC34A)),
+                    onDetailClick = {
+                        navController.navigate("dataBooking/$selectedDate/$selectedDate/all")
+                    }
+                )
+
+                CardDashboard(
+                    title = "Total Peminjaman Dipesan",
+                    value = data.data?.bookedBookings.toString(),
+                    gradientColors = listOf(Color(0xFF36D1DC), Color(0xFF5B86E5)),
+                    onDetailClick = {
+                        navController.navigate("dataBooking/$selectedDate/$selectedDate/booked")
+                    }
+                )
+
+                CardDashboard(
+                    title = "Total Peminjaman Selesai",
+                    value = data.data?.doneBookings.toString(),
+                    gradientColors = listOf(Color(0xFFFF9800), Color(0xFF8BC34A)),
+                    onDetailClick = {
+                        navController.navigate("dataBooking/$selectedDate/$selectedDate/done")
+                    }
+                )
+
+                CardDashboard(
+                    title = "Total Peminjaman Dibatalkan",
+                    value = data.data?.canceledBookings.toString(),
+                    gradientColors = listOf(Color(0xFFFF512F), Color(0xFFDD2476)),
+                    onDetailClick = {
+                        navController.navigate("dataBooking/$selectedDate/$selectedDate/cancel")
+                    }
+                )
             }
             is DashboardState.Error -> {
                 Text("Error: \${(dashboardState as DashboardState.Error).message}")
@@ -115,7 +155,8 @@ fun CardDashboard(
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(if (onDetailClick != null) Modifier.clickable { onDetailClick() } else Modifier),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -126,32 +167,13 @@ fun CardDashboard(
                 .fillMaxWidth()
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = title,
-                        style = Typography.bodyLarge,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f) // Membuat title memenuhi ruang yang tersedia
-                    )
-
-                    // Menampilkan IconButton jika onDetailClick tidak null
-                    if (onDetailClick != null) {
-                        IconButton(
-                            onClick = onDetailClick,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = "More",
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = title,
+                    style = Typography.bodyLarge,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -166,6 +188,7 @@ fun CardDashboard(
         }
     }
 }
+
 
 
 

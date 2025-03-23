@@ -93,7 +93,7 @@ fun AddUserScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Tambah User", style = MaterialTheme.typography.titleMedium) },
+                title = { Text("Tambah User") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(

@@ -111,7 +111,8 @@ fun DataScreen(navController: NavController, viewModel: DataViewModel = hiltView
                                     room?.capacity.toString(),
                                     "${room?.startTime}-${room?.endTime}"
                                 )
-                            }
+                            },
+                            onClick = { navController.navigate("data_rooms") }
                         )
                     }
 
@@ -125,7 +126,8 @@ fun DataScreen(navController: NavController, viewModel: DataViewModel = hiltView
                             "Selesai" to data.booking?.totalDone.toString(),
                             "Aktif" to data.booking?.totalBooked.toString(),
                             "Dibatalkan" to data.booking?.totalCancel.toString()
-                        )
+                        ),
+                        onClick = { navController.navigate("data_bookings") }
                     )
                 }
             }
@@ -141,11 +143,12 @@ fun DataScreen(navController: NavController, viewModel: DataViewModel = hiltView
 }
 
 @Composable
-fun CardDataBooking(title: String, total: String, bookingData: List<Pair<String, String>>) {
+fun CardDataBooking(title: String, total: String, bookingData: List<Pair<String, String>>, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -251,11 +254,12 @@ fun UserDataRow(role: String, count: String) {
 }
 
 @Composable
-fun CardDataRoom(title: String, total: String, roomData: List<Triple<String?, String, String>>) {
+fun CardDataRoom(title: String, total: String, roomData: List<Triple<String?, String, String>>, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),

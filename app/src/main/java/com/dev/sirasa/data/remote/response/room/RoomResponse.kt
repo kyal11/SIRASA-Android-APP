@@ -13,7 +13,25 @@ data class RoomResponse(
 	@field:SerializedName("status")
 	val status: String? = null
 )
+data class CreateRoomResponse(
 
+	@field:SerializedName("data")
+	val data: DataRoom? = null,
+
+	@field:SerializedName("message")
+	val message: String? = null,
+
+	@field:SerializedName("status")
+	val status: String? = null
+)
+
+data class DeletedRoomResponse(
+	@field:SerializedName("message")
+	val message: String? = null,
+
+	@field:SerializedName("status")
+	val status: String? = null
+)
 data class DataRoom(
 
 	@field:SerializedName("createdAt")
@@ -39,4 +57,12 @@ data class DataRoom(
 
 	@field:SerializedName("updatedAt")
 	val updatedAt: String? = null
+)
+
+data class RoomModel(
+	val name: String? = null,
+	val startTime: String? = null,
+	val endTime: String? = null,
+	val floor: Int? = null,
+	val capacity: Int? = null,
 )

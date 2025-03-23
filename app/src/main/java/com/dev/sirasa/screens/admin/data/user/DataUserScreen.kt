@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,9 +31,14 @@ import coil.compose.AsyncImage
 import com.dev.sirasa.R
 import com.dev.sirasa.data.remote.response.user.DataUser
 import com.dev.sirasa.screens.admin.data.DataViewModel
+import com.dev.sirasa.screens.admin.data.ExportState
 import com.dev.sirasa.ui.component.LoadingCircular
+import com.dev.sirasa.ui.component.convertMillisToApiFormat
 import com.dev.sirasa.ui.theme.Green700
 import com.dev.sirasa.ui.theme.Typography
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import com.dev.sirasa.ui.component.DateFieldFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,9 +51,10 @@ fun DataUserScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("All") }
     val roles = listOf("All", "Super Admin", "Admin", "User")
-
+    val exportState by viewModel.exportState.collectAsState()
     val users = viewModel.usersState.collectAsLazyPagingItems()
-
+    var showDialogUser by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     LaunchedEffect(searchQuery, selectedRole) {
         val roleFilter = when (selectedRole) {
             "Super Admin" -> "superadmin"
@@ -57,19 +64,34 @@ fun DataUserScreen(
         }
         viewModel.getUsers(searchQuery, roleFilter)
     }
+    if (showDialogUser) {
+        ExportDialogUser(
+            onDismiss = { showDialogUser = false },
+            onDateSelected = { startDate, endDate ->
+                viewModel.exportUsersToExcel(context, startDate, endDate)
+            }
+        )
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Data Users",
-                        style = Typography.titleMedium
+                        "Data Users"
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showDialogUser = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.download_icon),
+                            contentDescription = "Download"
+                        )
                     }
                 }
             )
@@ -185,9 +207,69 @@ fun DataUserScreen(
                     tint = Green700
                 )
             }
+            when (exportState) {
+                is ExportState.Loading -> LoadingCircular(true, Modifier.align(Alignment.Center))
+                is ExportState.Success -> {
+                    LaunchedEffect(Unit) {
+                        snackbarHostState.showSnackbar("Download berhasil!")
+                    }
+                }
+                is ExportState.Error -> {
+                    val errorMessage = (exportState as ExportState.Error).message
+                    LaunchedEffect(Unit) {
+                        snackbarHostState.showSnackbar("Terjadi kesalahan: $errorMessage")
+                    }
+                }
+                else -> {}
+            }
         }
     }
 }
+@Composable
+fun ExportDialogUser(
+    onDismiss: () -> Unit,
+    onDateSelected: (String, String) -> Unit
+) {
+    var startDate by remember { mutableStateOf<String?>(null) }
+    var endDate by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        containerColor = Color.White,
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onDateSelected(startDate ?: "", endDate ?: "")
+                onDismiss()
+            }) {
+                Text("Download")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Color.Red)
+            }
+        },
+        title = { Text("Export Data Users") },
+        text = {
+            Column {
+                Text("Start Date")
+                Spacer(modifier = Modifier.height(6.dp))
+                DateFieldFilter(
+                    onDateSelected = { selectedDate -> startDate = selectedDate },
+                    placeHolder = "Start Date"
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("End Date")
+                Spacer(modifier = Modifier.height(6.dp))
+                DateFieldFilter(
+                    onDateSelected = { selectedDate -> endDate = selectedDate },
+                    placeHolder = "End Date"
+                )
+            }
+        }
+    )
+}
+
 
 @Composable
 fun InputFieldSearch(label: String, placeHolder: String, value: String, onValueChange: (String) -> Unit, keyboardType: KeyboardType = KeyboardType.Text, modifier: Modifier = Modifier) {
