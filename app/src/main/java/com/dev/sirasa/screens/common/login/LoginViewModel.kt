@@ -1,8 +1,10 @@
 package com.dev.sirasa.screens.common.login
 
 import android.util.Log
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.sirasa.MainViewModel
 import com.dev.sirasa.data.local.UserModel
 import com.dev.sirasa.data.repository.AuthRepository
 import com.dev.sirasa.utils.JsonUtils.extractMessageFromJson
@@ -19,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
@@ -30,7 +32,7 @@ class LoginViewModel @Inject constructor(
         fetchFCMToken()
     }
 
-    fun login(email: String?, nim: String?, password: String) {
+    fun login(email: String?, nim: String?, password: String, onRoleReceived: (String) -> Unit) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             try {
@@ -40,8 +42,8 @@ class LoginViewModel @Inject constructor(
                             val token = response.data?.token ?: ""
                             Log.d("token verified: ", token)
                             val isVerified = JwtUtils.isVerified(token) ?: false
-                            val role = JwtUtils.getRole(token) ?: false
-
+                            val role = JwtUtils.getRole(token) ?: ""
+                            onRoleReceived(role)
                             val userModel = UserModel(
                                 name = response.data?.name ?: "",
                                 email = response.data?.email ?: "",

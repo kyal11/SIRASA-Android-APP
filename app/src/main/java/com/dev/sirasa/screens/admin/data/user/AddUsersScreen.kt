@@ -60,6 +60,7 @@ import com.dev.sirasa.ui.theme.Typography
 fun AddUserScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    userRole: String?,
     onBack: () -> Unit,
     viewModel: DataViewModel = hiltViewModel(),
 ) {
@@ -118,7 +119,9 @@ fun AddUserScreen(
                 InputField(label = "Nomor Telepon", placeHolder = "Masukkan No Telepon", value = phoneNumber, onValueChange = { phoneNumber = it }, keyboardType = KeyboardType.Phone)
                 InputField(label = "NIM", placeHolder = "Masukkan NIM", value = nim, onValueChange = { nim = it }, keyboardType = KeyboardType.Number)
                 PasswordField(label = "Password", value = password, onValueChange = { password = it }, passwordVisible = passwordVisible, onTogglePassword = { passwordVisible = !passwordVisible })
-                DropdownField(label= "Role", options = roles, selectedOption = role, onOptionSelected = { role = it })
+                if (userRole == "superadmin") {
+                    DropdownField(label= "Role", options = roles, selectedOption = role, onOptionSelected = { role = it })
+                }
 
                 Row(
                     modifier = Modifier.align(Alignment.Start),

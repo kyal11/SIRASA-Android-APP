@@ -113,11 +113,10 @@ fun MoreHistoryScreen(onBack: () -> Unit, viewModel: HistoryMainModel = hiltView
                                     idBooking = booking.id,
                                     dateBooking = date,
                                     name = roomName,
-                                    phone = "tes",
                                     timeSlot = timeSlot,
                                     location = "Lantai ${booking.room?.floor}",
                                     participants = "${booking.participant} Orang",
-                                    description = if (booking.description.isNullOrEmpty()) "tidak ada" else booking.description,
+                                    description = booking.description,
                                     status = booking.status,
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))

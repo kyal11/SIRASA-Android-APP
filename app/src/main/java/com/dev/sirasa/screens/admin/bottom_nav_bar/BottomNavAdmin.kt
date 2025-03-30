@@ -18,6 +18,9 @@ import androidx.navigation.compose.rememberNavController
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
 
+import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
+
 @Composable
 fun BottomNavAdmin(navController: NavController) {
     val items = listOf(
@@ -27,12 +30,31 @@ fun BottomNavAdmin(navController: NavController) {
         BottomNavItemAdmin.Data,
         BottomNavItemAdmin.Profile
     )
-    val currentRoute = navController.currentBackStackEntryAsState()
-        .value?.destination?.route
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    // Melacak route sebelumnya untuk mendeteksi perpindahan dari QR Scan
+    var previousRoute by remember { mutableStateOf<String?>(null) }
+    var isLocked by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Deteksi perpindahan dari QR Scan ke halaman lain
+    LaunchedEffect(currentRoute) {
+        if (previousRoute == BottomNavItemAdmin.ScanQr.route &&
+            currentRoute != BottomNavItemAdmin.ScanQr.route) {
+            isLocked = true
+            // Delay 1 detik sebelum mengaktifkan kembali tombol
+            coroutineScope.launch {
+                kotlinx.coroutines.delay(1000)
+                isLocked = false
+            }
+        }
+        // Update previousRoute setelah memeriksa kondisi
+        previousRoute = currentRoute
+    }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
         NavigationBar(
             containerColor = Color.White,
             modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
@@ -56,6 +78,7 @@ fun BottomNavAdmin(navController: NavController) {
                                 }
                             }
                         },
+//                        enabled = !isLocked,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             unselectedIconColor = Color.Gray,
@@ -66,9 +89,11 @@ fun BottomNavAdmin(navController: NavController) {
                 }
             }
         }
+
+        // Karena tidak ada parameter enabled, kita gunakan kondisi di dalam onClick
         FloatingActionButton(
             onClick = {
-                if (currentRoute != BottomNavItemAdmin.ScanQr.route) {
+                if (!isLocked && currentRoute != BottomNavItemAdmin.ScanQr.route) {
                     navController.navigate(BottomNavItemAdmin.ScanQr.route) {
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
@@ -82,13 +107,14 @@ fun BottomNavAdmin(navController: NavController) {
                 .align(Alignment.TopCenter)
                 .padding(top = 8.dp),
             shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primary,
+            // Ubah warna container saat terkunci untuk memberikan indikasi visual
+            containerColor = if (isLocked) Color.Gray else MaterialTheme.colorScheme.primary,
             elevation = FloatingActionButtonDefaults.elevation(
                 defaultElevation = 2.dp,
                 pressedElevation = 3.dp,
                 focusedElevation = 3.dp,
                 hoveredElevation = 3.dp
-            )
+            ),
         ) {
             Icon(
                 painter = painterResource(id = BottomNavItemAdmin.ScanQr.icon),
@@ -99,7 +125,6 @@ fun BottomNavAdmin(navController: NavController) {
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun preview() {

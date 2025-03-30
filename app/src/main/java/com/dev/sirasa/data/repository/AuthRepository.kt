@@ -10,6 +10,8 @@ import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.retrofit.ApiService
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
@@ -18,6 +20,9 @@ class AuthRepository @Inject constructor(
     private val userPreference: UserPreference,
     private val apiService: ApiService
 ) {
+    private val _userRole = MutableStateFlow<String?>(null)
+    val userRole: StateFlow<String?> = _userRole
+
     suspend fun register(name: String, email: String, password: String, passwordConfirm: String, nim: String, phoneNumber: String): Flow<RegisterResponse> = flow {
         emit(apiService.register(name, email, password, passwordConfirm, nim, phoneNumber))
     }

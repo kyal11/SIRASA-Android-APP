@@ -3,6 +3,7 @@ package com.dev.sirasa.screens.user.history
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
@@ -50,14 +52,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.dev.sirasa.R
 import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.Green700
+import com.dev.sirasa.ui.theme.Green800
 import com.dev.sirasa.ui.theme.Typography
 import com.dev.sirasa.utils.formatDate
 import com.dev.sirasa.utils.formatTimeSlot
@@ -175,7 +185,7 @@ fun UserHistoryScreen(navController: NavController, viewModel: HistoryMainModel 
                                                 timeSlot = timeSlot,
                                                 location = "Lantai ${booking.room?.floor}",
                                                 participants = "${booking.participant} Orang",
-                                                description = if (booking.description.isNullOrEmpty()) "tidak ada" else booking.description,
+                                                description = booking.description,
                                                 status = booking.status,
                                                 onCancelBooking = {
                                                     viewModel.cancelBooking(booking.id)
@@ -258,7 +268,7 @@ fun UserHistoryScreen(navController: NavController, viewModel: HistoryMainModel 
                                         timeSlot = timeSlot,
                                         location = "Lantai ${booking.room?.floor}",
                                         participants = "${booking.participant} Orang",
-                                        description = if (booking.description.isNullOrEmpty()) "tidak ada" else booking.description,
+                                        description =  booking.description,
                                         status = booking.status,
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
@@ -284,9 +294,10 @@ fun CardHistory(
     timeSlot: String,
     location: String,
     participants: String,
-    description: String,
+    description: String ? = null,
     status: String,
-    onCancelBooking: (() -> Unit)? = null
+    onCancelBooking: (() -> Unit)? = null,
+    viewModel: HistoryMainModel = hiltViewModel()
 ) {
     val (badgeColor, statusText) = when (status) {
         "cancel" -> Color.Red to "Dibatalkan"
@@ -362,48 +373,103 @@ fun CardHistory(
             Spacer(modifier = Modifier.height(6.dp))
             Text(participants, style = Typography.bodyMedium)
             Spacer(modifier = Modifier.height(6.dp))
-            Text(description, style = Typography.bodyMedium, maxLines = 2)
+            if (!description.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(description, style = Typography.bodyMedium, maxLines = 2)
+            }
 
             if (status == "booked") {
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = { showQr = true },
-                    modifier = Modifier.align(Alignment.CenterHorizontally).height(42.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .height(42.dp)
+                        .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), shape = RoundedCornerShape(8.dp)), // Border lembut
                     shape = RoundedCornerShape(8.dp),
-                    contentPadding =  PaddingValues(horizontal = 6.dp, vertical = 4.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Green700, contentColor = Color.White),
-                    border = BorderStroke(width = 1.dp, color = Color(0xFFE2E8F0))
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Green800
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 2.dp)
                 ) {
-                    Text("Show QR Code")
+                    Text("Show QR Code", fontWeight = FontWeight.Bold)
                 }
+//                Button(
+//                    onClick = { showQr = true },
+//                    modifier = Modifier.align(Alignment.CenterHorizontally).height(42.dp),
+//                    shape = RoundedCornerShape(8.dp),
+//                    contentPadding =  PaddingValues(horizontal = 6.dp, vertical = 4.dp),
+//                    colors = ButtonDefaults.buttonColors(containerColor = Green700, contentColor = Color.White),
+//                    border = BorderStroke(width = 1.dp, color = Color(0xFFE2E8F0))
+//                ) {
+//                    Text("Show QR Code")
+//                }
             }
         }
     }
     if (showQr) {
-        QrCodeDialog(idBooking) { showQr = false }
+        viewModel.setDialogOpen(true)
+        QrCodeDialog(viewModel, idBooking) {
+            showQr = false
+            viewModel.setDialogOpen(false)
+        }
     }
 }
 @Composable
-fun QrCodeDialog(idBooking: String, onDismiss: () -> Unit) {
+fun QrCodeDialog(viewModel: HistoryMainModel, idBooking: String, onDismiss: () -> Unit) {
+    val isValidated by viewModel.isBookingValidated.collectAsState()
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.succes_animation))
     AlertDialog(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = {
+            onDismiss()
+            viewModel.setDialogOpen(false)
+                           },
         containerColor = Color.White,
         shape = RoundedCornerShape(8.dp),
         confirmButton = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Button(
-                    onClick = { onDismiss() },
-                    shape = RoundedCornerShape(8.dp)
+                    onClick = {
+                        onDismiss()
+                        viewModel.setDialogOpen(false)
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                    border = BorderStroke(2.dp, Color(0xFFD1D5DB)),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 4.dp
+                    ),
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
                 ) {
-                    Text("Tutup")
+                    Text("Tutup", fontWeight = FontWeight.Bold)
                 }
             }
+
         },
         text = {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("QR Code Booking", style = Typography.titleMedium)
-                Spacer(modifier = Modifier.height(10.dp))
-                GenerateQrCode(idBooking)
+            if (isValidated) {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    LottieAnimation(
+                        modifier = Modifier.fillMaxWidth().height(150.dp),
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text("Check In Berhasil!", style = Typography.titleMedium)
+                }
+            } else {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("QR Code Booking", style = Typography.titleMedium)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    GenerateQrCode(idBooking)
+                }
             }
         }
     )

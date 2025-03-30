@@ -43,18 +43,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import android.Manifest;
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import com.dev.sirasa.R
 import com.dev.sirasa.ui.component.LoadingCircular
+import com.dev.sirasa.ui.theme.GrayBackground
 import com.dev.sirasa.ui.theme.Green300
 import com.dev.sirasa.ui.theme.Green600
 import com.dev.sirasa.ui.theme.Green700
 import com.dev.sirasa.ui.theme.Green800
 import com.dev.sirasa.ui.theme.Green900
+import com.dev.sirasa.ui.theme.Typography
 import com.dev.sirasa.utils.QRCodeAnalyzer
 import com.dev.sirasa.utils.formatDate
 import com.dev.sirasa.utils.formatTimeSlot
@@ -87,6 +93,16 @@ fun QrCodeScannerScreen(
         }
     }
 
+    DisposableEffect(lifecycleOwner) {
+        onDispose {
+            try {
+                val cameraProvider = cameraProviderFuture.get()
+                cameraProvider.unbindAll()
+            } catch (e: Exception) {
+                Log.e("QrCodeScannerScreen", "Error unbinding camera", e)
+            }
+        }
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         if (cameraPermissionGranted.value) {
             Box(
@@ -179,19 +195,20 @@ fun QrCodeScannerScreen(
         }
 
         if (cameraPermissionGranted.value) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
                 when (bookingValidationState.value) {
                     is ScanState.Idle -> {
-                        Text(
-                            "Arahkan kamera ke QR code",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Arahkan kamera ke QR code",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
 
                     is ScanState.Loading -> {
@@ -209,6 +226,14 @@ fun QrCodeScannerScreen(
                     is ScanState.Success -> {
                         val data = (bookingValidationState.value as ScanState.Success).data
                         Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .border(
+                                    width = 2.dp,
+                                    color = GrayBackground
+                                )
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             val date =
@@ -220,21 +245,22 @@ fun QrCodeScannerScreen(
                                 color = Green700
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-
-
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Berhasil",
-                                    modifier = Modifier.size(64.dp),
-                                    tint = Green300
+                                Image(
+                                    painter = painterResource(id = R.drawable.check_circle_icon),
+                                    contentDescription = "Success",
+                                    modifier = Modifier.size(64.dp)
                                 )
+//                                Icon(
+//                                    imageVector = Icons.Default.Check,
+//                                    contentDescription = "Berhasil",
+//                                    modifier = Modifier.size(64.dp),
+//                                    tint = Green300
+//                                )
                             }
-
-                            // Pesan Gagal
                             Text(
                                 "Berhasil",
                                 modifier = Modifier.fillMaxWidth(),
@@ -242,30 +268,26 @@ fun QrCodeScannerScreen(
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Green700
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(date, textAlign = TextAlign.End, style = MaterialTheme.typography.displayMedium, color = Green800, modifier = Modifier.fillMaxWidth())
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(data.user?.name!!, style = MaterialTheme.typography.titleMedium, color = Green900)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(data.user?.phoneNumber!!, style = MaterialTheme.typography.displayMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(timeSlot, style = MaterialTheme.typography.displayMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(data.room?.name!!, style = MaterialTheme.typography.displayMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("${data.participant} Orang", style = MaterialTheme.typography.displayMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            data.description?.let {
-                                Text(
-                                    it,
-                                    style = MaterialTheme.typography.displayMedium,
-                                )
+                            Column {
+                                Text(date, textAlign = TextAlign.End, style = MaterialTheme.typography.displayMedium, color = Green800, modifier = Modifier.fillMaxWidth())
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(data.user?.name!!, style = MaterialTheme.typography.titleMedium, color = Green900)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(data.user?.phoneNumber!!, style = MaterialTheme.typography.displayMedium)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(timeSlot, style = MaterialTheme.typography.displayMedium)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(data.room?.name!!, style = MaterialTheme.typography.displayMedium)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("${data.participant} Orang", style = MaterialTheme.typography.displayMedium)
+                                if (!data.description.isNullOrEmpty()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(data.description, style = Typography.bodyMedium, maxLines = 2)
+                                }
                             }
-
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                             Button(
                                 onClick = {
-                                    // Reset the states for next scan
                                     scanState.value = null
                                     viewModel.resetValidationState()
                                 },
@@ -278,6 +300,10 @@ fun QrCodeScannerScreen(
 
                     is ScanState.Error -> {
                         Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -295,7 +321,6 @@ fun QrCodeScannerScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
                                 onClick = {
-                                    // Reset the states for next scan
                                     scanState.value = null
                                     viewModel.resetValidationState()
                                 },
@@ -308,6 +333,6 @@ fun QrCodeScannerScreen(
                     else -> {}
                 }
             }
-        }
+
     }
 }

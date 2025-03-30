@@ -32,6 +32,7 @@ import com.dev.sirasa.screens.user.room.RoomViewModel
 fun AddRoomScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    userRole: String?,
     viewModel: RoomViewModel = hiltViewModel(),
     onBack: () -> Unit,
 ) {
@@ -139,6 +140,7 @@ fun InputField(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    readOnly: Boolean? = false,
     onValueChange: (String) -> Unit
 ) {
     Column(modifier = modifier) {
@@ -155,13 +157,14 @@ fun InputField(
             keyboardOptions = KeyboardOptions.Default,
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color(0xFFE2E8F0)),
-            singleLine = true
+            singleLine = true,
+            readOnly = readOnly!!
         )
     }
 }
 
 @Composable
-fun TimePickerField(label: String, time: String, modifier: Modifier, onTimeSelected: (String) -> Unit) {
+fun TimePickerField(label: String, time: String, modifier: Modifier, readOnly: Boolean = false, onTimeSelected: (String) -> Unit) {
     var showTimePicker by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
@@ -198,7 +201,7 @@ fun TimePickerField(label: String, time: String, modifier: Modifier, onTimeSelec
         )
     }
 
-    if (showTimePicker) {
+    if (showTimePicker && !readOnly) {
         TimePickerDialogM3(
             initialHour = time.take(2).toIntOrNull() ?: 0,
             onTimeSelected = {

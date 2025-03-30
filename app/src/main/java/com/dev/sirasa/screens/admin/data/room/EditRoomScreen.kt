@@ -50,6 +50,7 @@ import com.dev.sirasa.screens.user.room.RoomsDetailState
 fun EditRoomScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    userRole: String?,
     roomId: String,
     viewModel: RoomViewModel = hiltViewModel(),
     onBack: () -> Unit
@@ -105,57 +106,66 @@ fun EditRoomScreen(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                InputField("Nama Ruangan", name) { name = it }
+                InputField("Nama Ruangan", name, readOnly = userRole != "superadmin") { name = it }
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     InputField(
                         label = "Lantai",
                         value = floor,
-                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        readOnly = userRole != "superadmin"
                     ) { floor = it }
 
                     InputField(
                         label = "Kapasitas Ruangan",
                         value = capacity,
-                        modifier = Modifier.weight(1f).padding(start = 8.dp)
+                        modifier = Modifier.weight(1f).padding(start = 8.dp),
+                        readOnly = userRole != "superadmin"
                     ) { capacity = it }
                 }
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TimePickerField("Start Time", startTime, Modifier.weight(1f).padding(end = 8.dp)) {
+                    TimePickerField("Start Time", startTime, Modifier.weight(1f).padding(end = 8.dp), readOnly = userRole != "superadmin") {
                         startTime = it
                     }
-                    TimePickerField("End Time", endTime, Modifier.weight(1f).padding(start = 8.dp)) {
+                    TimePickerField("End Time", endTime, Modifier.weight(1f).padding(start = 8.dp), readOnly = userRole != "superadmin") {
                         endTime = it
                     }
                 }
-
-                Button(
-                    onClick = {
-                        showUpdateDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    if (updateRoomState is EditRoomState.Loading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("Simpan Perubahan")
+                if (userRole == "superadmin") {
+                    Button(
+                        onClick = {
+                            showUpdateDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        if (updateRoomState is EditRoomState.Loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Text("Simpan Perubahan")
+                        }
                     }
-                }
 
-                Button(
-                    onClick = {
-                        showDeleteDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Red)
-                ) {
-                    if (deleteRoomState is DeleteRoomState.Loading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("Hapus Ruangan")
+                    Button(
+                        onClick = {
+                            showDeleteDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Red)
+                    ) {
+                        if (deleteRoomState is DeleteRoomState.Loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Text("Hapus Ruangan")
+                        }
                     }
                 }
             }

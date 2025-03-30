@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 fun DetailUserScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    userRole: String?,
     userId: String,
     onBack: () -> Unit,
     dataViewModel: DataViewModel = hiltViewModel()
@@ -194,22 +195,26 @@ fun DetailUserScreen(
                                     editingField = "verified"
                                     showEditDialog = true
                                 }
-                                ProfileDetail(label = "Role", value = userData?.role ?: "User") {
-                                    editingField = "role"
-                                    showEditDialog = true
-                                }
+                                ProfileDetail(label = "Role", value = userData?.role ?: "User", onEdit = if (userRole == "superadmin") {
+                                    {
+                                        editingField = "role"
+                                        showEditDialog = true
+                                    }
+                                } else null)
+
                             }
                         }
-
-                        Button(
-                            onClick = { showDeleteDialog = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 64.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                        ) {
-                            Text("Delete", style = Typography.titleMedium)
+                        if (userRole == "superadmin") {
+                            Button(
+                                onClick = { showDeleteDialog = true },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 64.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            ) {
+                                Text("Delete", style = Typography.titleMedium)
+                            }
                         }
                     }
                 }

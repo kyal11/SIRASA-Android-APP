@@ -43,15 +43,31 @@ class HistoryMainModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _isDialogOpen = MutableStateFlow(false)
+    val isDialogOpen: StateFlow<Boolean> = _isDialogOpen.asStateFlow()
+
+    private val _isBookingValidated = MutableStateFlow(false)
+    val isBookingValidated: StateFlow<Boolean> = _isBookingValidated.asStateFlow()
+
+    fun setDialogOpen(isOpen: Boolean) {
+        _isDialogOpen.value = isOpen
+    }
     init {
         viewModelScope.launch {
             WebSocketManager.connect { userPreference.getSession() }
         }
         viewModelScope.launch {
             WebSocketManager.bookingUpdateFlow.collect {
-                refreshHistory()
+                _isBookingValidated.value = true
+                isDialogOpen.collect { isOpen ->
+                    if (!isOpen) {
+                        refreshHistory()
+                        _isBookingValidated.value = false
+                    }
+                }
             }
         }
+
     }
 
     override fun onCleared() {

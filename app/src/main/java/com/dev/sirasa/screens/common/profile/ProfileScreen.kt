@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -72,6 +74,33 @@ fun ProfileScreen(
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(
+                onClick = { navController.navigate("contact_screen") },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.contact_icon),
+                    contentDescription = "Contact",
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+
+            IconButton(
+                onClick = { navController.navigate("faq_screen") },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.faq_icon),
+                    contentDescription = "FAQ",
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         // Profile Image
@@ -206,12 +235,20 @@ fun ProfileScreen(
                         onClick = {
                             imagePickerLauncher.launch("image/*")
                         },
+                        shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Blue
+                            containerColor = Color.White,
+                            contentColor = Color.Black
                         ),
-                        shape = RoundedCornerShape(8.dp)
+                        border = BorderStroke(2.dp, Color(0xFFD1D5DB)),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 8.dp,
+                            pressedElevation = 4.dp
+                        ),
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
                     ) {
-                        Text("Select from Gallery")
+                        Text("Pilih Gambar", fontWeight = FontWeight.Bold)
                     }
                     if (selectedImageUri != null) {
                         Button(

@@ -64,6 +64,7 @@ import com.dev.sirasa.ui.theme.Typography
 fun DataRoomScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    userRole: String?,
     viewModel: DataViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     onBack: () -> Unit,
@@ -116,17 +117,21 @@ fun DataRoomScreen(
                 }
 
             }
-            FloatingActionButton(
-                modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 12.dp, end = 12.dp),
-                onClick = {navController.navigate("add_room")},
-                containerColor = Color.White,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    modifier = Modifier.size(32.dp),
-                    tint = Green700
-                )
+            if (userRole == "superadmin") {
+                FloatingActionButton(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 12.dp, end = 12.dp),
+                    onClick = { navController.navigate("add_room") },
+                    containerColor = Color.White,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        modifier = Modifier.size(32.dp),
+                        tint = Green700
+                    )
+                }
             }
         }
     }

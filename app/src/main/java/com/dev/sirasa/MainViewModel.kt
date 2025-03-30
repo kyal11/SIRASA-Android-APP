@@ -23,9 +23,8 @@ class MainViewModel @Inject constructor(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
     val authState: StateFlow<AuthState> = _authState
 
-    init {
-        checkUserSession()
-    }
+    private val _userRole = MutableStateFlow<String?>(null)
+    val userRole: StateFlow<String?> = _userRole
 
     fun validateEmail(token: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -85,14 +84,16 @@ class MainViewModel @Inject constructor(
     private fun authenticateUser(token: String) {
         val role = JwtUtils.getRole(token)
         val isVerified = JwtUtils.isVerified(token) ?: false
-
+        _userRole.value = role
         _authState.value = when {
             role == "superadmin" || role == "admin" -> AuthState.Authorized("main_screen_admin")
             !isVerified -> AuthState.Unauthorized
             else -> AuthState.Authorized("main_screen_user")
         }
     }
-
+    fun setUserRole(role: String?) {
+        _userRole.value = role
+    }
 }
 
 sealed class AuthState {

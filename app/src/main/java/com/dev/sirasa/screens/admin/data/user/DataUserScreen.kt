@@ -45,11 +45,12 @@ import com.dev.sirasa.ui.component.DateFieldFilter
 fun DataUserScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    userRole: String?,
     viewModel: DataViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("All") }
+    var selectedRole by remember { mutableStateOf(if (userRole == "admin") "User" else "All") }
     val roles = listOf("All", "Super Admin", "Admin", "User")
     val exportState by viewModel.exportState.collectAsState()
     val users = viewModel.usersState.collectAsLazyPagingItems()
@@ -119,20 +120,22 @@ fun DataUserScreen(
                 )
 
                 // Role Filter
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    roles.forEach { role ->
-                        Button(
-                            onClick = { selectedRole = role },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedRole == role) MaterialTheme.colorScheme.primary else Color.White,
-                                contentColor = if (selectedRole == role) Color.White else Color.Black
-                            ),
-                            border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-                        ) {
-                            Text(text = role)
+                if (userRole == "superadmin") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        roles.forEach { role ->
+                            Button(
+                                onClick = { selectedRole = role },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedRole == role) MaterialTheme.colorScheme.primary else Color.White,
+                                    contentColor = if (selectedRole == role) Color.White else Color.Black
+                                ),
+                                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                            ) {
+                                Text(text = role)
+                            }
                         }
                     }
                 }

@@ -115,7 +115,7 @@ fun MoreBookingScreen(onBack: () -> Unit, viewModel: HistoryMainModel = hiltView
                                     timeSlot = timeSlot,
                                     location = "Lantai ${booking.room?.floor}",
                                     participants = "${booking.participant} Orang",
-                                    description = if (booking.description.isNullOrEmpty()) "tidak ada" else booking.description,
+                                    description = booking.description,
                                     status = booking.status,
                                     onCancelBooking = {
                                         viewModel.cancelBooking(booking.id)

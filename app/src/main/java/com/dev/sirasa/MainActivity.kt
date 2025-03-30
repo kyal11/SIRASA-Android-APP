@@ -44,6 +44,14 @@ import com.dev.sirasa.screens.user.room.UserRoomScreen
 import com.dev.sirasa.ui.theme.SirasaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.viewModels
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,6 +61,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -66,16 +76,18 @@ import com.dev.sirasa.screens.admin.data.user.AddUserScreen
 import com.dev.sirasa.screens.admin.data.user.DataUserScreen
 import com.dev.sirasa.screens.admin.data.user.DetailUserScreen
 import com.dev.sirasa.screens.admin.qr_code_booking.QrCodeScannerScreen
+import com.dev.sirasa.screens.common.contact.ContactUsScreen
+import com.dev.sirasa.screens.common.faq.FaqScreen
 import com.dev.sirasa.screens.user.history.MoreBookingScreen
 import com.dev.sirasa.screens.user.history.MoreHistoryScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    val viewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val viewModel: MainViewModel by viewModels()
         requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 Log.d("Permission", "Notification permission granted.")
@@ -84,22 +96,22 @@ class MainActivity : ComponentActivity() {
             }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Check if we already have the notification permission
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                // Permission already granted
             } else {
-                // Request the permission
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
         setContent {
+            viewModel.checkUserSession()
             val authState by viewModel.authState.collectAsState()
+            val userRole by viewModel.userRole.collectAsState()
             val snackbarHostState = remember { SnackbarHostState() }
-            SirasaTheme {
+            Log.d("role user in mainactivy : ", "${userRole}")
+            SirasaTheme(darkTheme = false) {
                 when (authState) {
                     is AuthState.Loading -> {
                         Box(
@@ -128,7 +140,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.padding(innerPadding)
                             ) {
                                 composable("main_screen_user") { MainScreenUser(snackbarHostState) }
-                                composable("main_screen_admin") { MainScreenAdmin(snackbarHostState) }
+                                composable("main_screen_admin") { MainScreenAdmin(snackbarHostState, userRole) }
                             }
                         }
                     }
@@ -150,6 +162,8 @@ fun AuthScreen(snackbarHostState: SnackbarHostState, viewModel: MainViewModel = 
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
     val coroutineScope = rememberCoroutineScope()
+    val userRole by viewModel.userRole.collectAsState()
+    Log.d("role user in authscreen : ", "${userRole}")
     LaunchedEffect(intent?.data) {
         intent?.data?.let { uri ->
             Log.d("DeepLink", "Received deep link: $uri")
@@ -180,13 +194,17 @@ fun AuthScreen(snackbarHostState: SnackbarHostState, viewModel: MainViewModel = 
             NavHost(
                 navController = navController,
                 startDestination = "login",
+                enterTransition = { minimalistEnterTransition() },
+                exitTransition = { minimalistExitTransition() },
+                popEnterTransition = { minimalistPopEnterTransition() },
+                popExitTransition = { minimalistPopExitTransition() }
             ) {
                 composable("login") { LoginScreen(navController, snackbarHostState) }
                 composable("register") { RegisterScreen(navController, snackbarHostState) }
                 composable("forget_password") { ResetPasswordScreen(navController,snackbarHostState) }
                 composable("verified_account") { VerifiedAccountScreen(snackbarHostState) }
                 composable("main_screen_user") { MainScreenUser(snackbarHostState) }
-                composable("main_screen_admin") { MainScreenAdmin(snackbarHostState) }
+                composable("main_screen_admin") { MainScreenAdmin(snackbarHostState, userRole) }
                 composable(
                     route = "reset_password?token={token}",
                     deepLinks = listOf(
@@ -206,11 +224,13 @@ fun MainScreenUser(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    // List of routes where bottom navigation should be hidden
-    val routesWithoutBottomBar = listOf("auth_screen", "more_booking", "more_history")
-
-    // Check if bottom bar should be shown for current route
+    val routesWithoutBottomBar = listOf(
+        RoutesUser.AuthScreen,
+        RoutesUser.MoreHistory,
+        RoutesUser.MoreBooking,
+        RoutesUser.FaqScreen,
+        RoutesUser.ContactScreen
+    )
     val showBottomBar = currentRoute !in routesWithoutBottomBar
 
     Scaffold(
@@ -224,7 +244,11 @@ fun MainScreenUser(snackbarHostState: SnackbarHostState) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItemUser.Home.route,
-            modifier = Modifier.consumeWindowInsets(innerPadding)
+            modifier = Modifier.consumeWindowInsets(innerPadding),
+            enterTransition = { minimalistEnterTransition() },
+            exitTransition = { minimalistExitTransition() },
+            popEnterTransition = { minimalistPopEnterTransition() },
+            popExitTransition = { minimalistPopExitTransition() }
         ) {
             composable(BottomNavItemUser.Home.route) {
                 Box(
@@ -254,15 +278,24 @@ fun MainScreenUser(snackbarHostState: SnackbarHostState) {
                     ProfileScreen(navController, snackbarHostState)
                 }
             }
-            composable("more_history") { MoreHistoryScreen(onBack = { navController.popBackStack() }) }
-            composable("more_booking") { MoreBookingScreen(onBack = { navController.popBackStack() }) }
-            composable("auth_screen") { AuthScreen(snackbarHostState) }
+            composable(RoutesUser.MoreHistory) { MoreHistoryScreen(onBack = { navController.popBackStack() }) }
+            composable(RoutesUser.MoreBooking) { MoreBookingScreen(onBack = { navController.popBackStack() }) }
+            composable(RoutesUser.AuthScreen) { AuthScreen(snackbarHostState) }
+            composable(RoutesUser.FaqScreen) { FaqScreen(snackbarHostState, onBack = { navController.popBackStack() })}
+            composable(RoutesUser.ContactScreen) { ContactUsScreen(onBack = { navController.popBackStack() }) }
         }
     }
 }
+object RoutesUser {
+    const val MoreHistory = "more_history"
+    const val MoreBooking = "more_booking"
+    const val AuthScreen = "auth_screen"
+    const val FaqScreen = "faq_screen"
+    const val ContactScreen = "contact_screen"
+}
 
 @Composable
-fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
+fun MainScreenAdmin(snackbarHostState: SnackbarHostState, userRole: String?) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -273,10 +306,12 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
         RoutesAdmin.ProfileDetail,
         RoutesAdmin.DataBookings,
         RoutesAdmin.AddBooking,
-        RoutesAdmin.dashboardBooking,
+        RoutesAdmin.DashboardBooking,
         RoutesAdmin.DataRooms,
         RoutesAdmin.AddRoom,
-        RoutesAdmin.EditRoom
+        RoutesAdmin.EditRoom,
+        RoutesAdmin.FaqScreen,
+        RoutesAdmin.ContactScreen
     )
     val showBottomBar = currentRoute !in routesWithoutBottomBar
 
@@ -291,7 +326,11 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItemAdmin.Home.route,
-            modifier = Modifier.consumeWindowInsets(innerPadding)
+            modifier = Modifier.consumeWindowInsets(innerPadding),
+            enterTransition = { minimalistEnterTransition() },
+            exitTransition = { minimalistExitTransition() },
+            popEnterTransition = { minimalistPopEnterTransition() },
+            popExitTransition = { minimalistPopExitTransition() }
         ) {
             composable(BottomNavItemAdmin.Home.route) {
                 Box(
@@ -331,10 +370,10 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
 
             composable(RoutesAdmin.AuthScreen) { AuthScreen(snackbarHostState) }
             composable(RoutesAdmin.DataUsers) {
-                DataUserScreen(navController, snackbarHostState) { navController.popBackStack() }
+                DataUserScreen(navController, snackbarHostState, userRole) { navController.popBackStack() }
             }
             composable(RoutesAdmin.AddUser) {
-                AddUserScreen(navController, snackbarHostState, onBack = { navController.popBackStack() })
+                AddUserScreen(navController, snackbarHostState, userRole, onBack = { navController.popBackStack() })
             }
             composable(
                 RoutesAdmin.ProfileDetail,
@@ -342,7 +381,7 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
             ) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")
                 userId?.let {
-                    DetailUserScreen(navController,snackbarHostState, userId, onBack = { navController.popBackStack() })
+                    DetailUserScreen(navController,snackbarHostState, userRole,userId, onBack = { navController.popBackStack() })
                 }
             }
             composable(RoutesAdmin.DataBookings) {
@@ -352,7 +391,7 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                 AddBookingScreen(navController, snackbarHostState, { navController.popBackStack() })
             }
             composable(
-                "dataBooking/{startDate}/{endDate}/{status}",
+                RoutesAdmin.DashboardBooking,
                 arguments = listOf(
                     navArgument("startDate") { type = NavType.StringType },
                     navArgument("endDate") { type = NavType.StringType },
@@ -373,18 +412,20 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState) {
                 )
             }
             composable(RoutesAdmin.DataRooms) {
-                DataRoomScreen(navController, snackbarHostState, onBack = { navController.popBackStack() })
+                DataRoomScreen(navController, snackbarHostState, userRole,  onBack = { navController.popBackStack() })
             }
             composable(RoutesAdmin.AddRoom) {
-                AddRoomScreen(navController, snackbarHostState, onBack = { navController.popBackStack() })
+                AddRoomScreen(navController, snackbarHostState, userRole, onBack = { navController.popBackStack() })
             }
             composable(
                 RoutesAdmin.EditRoom,
                 arguments = listOf(navArgument("roomId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val roomId = backStackEntry.arguments?.getString("roomId") ?: ""
-                EditRoomScreen(navController, snackbarHostState ,roomId, onBack = { navController.popBackStack() })
+                EditRoomScreen(navController, snackbarHostState , userRole, roomId, onBack = { navController.popBackStack() })
             }
+            composable(RoutesAdmin.FaqScreen) { FaqScreen(snackbarHostState, onBack = { navController.popBackStack() })}
+            composable(RoutesAdmin.ContactScreen) { ContactUsScreen(onBack = { navController.popBackStack() }) }
         }
     }
 }
@@ -396,8 +437,39 @@ object RoutesAdmin {
     const val ProfileDetail = "profile/{userId}"
     const val DataBookings = "data_bookings"
     const val AddBooking = "add_booking"
-    const val dashboardBooking = "dataBooking/{startDate}/{endDate}/{status}"
+    const val DashboardBooking = "dataBooking/{startDate}/{endDate}/{status}"
     const val DataRooms = "data_rooms"
     const val AddRoom = "add_room"
     const val EditRoom = "edit_room/{roomId}"
+    const val FaqScreen = "faq_screen"
+    const val ContactScreen = "contact_screen"
+}
+
+// Improved NavHost animations
+fun minimalistEnterTransition(): EnterTransition {
+    return slideInHorizontally(
+        initialOffsetX = { width -> width },
+        animationSpec = tween(300, easing = LinearOutSlowInEasing)
+    ) + fadeIn(animationSpec = tween(300))
+}
+
+fun minimalistExitTransition(): ExitTransition {
+    return slideOutHorizontally(
+        targetOffsetX = { width -> -width },
+        animationSpec = tween(300, easing = LinearOutSlowInEasing)
+    ) + fadeOut(animationSpec = tween(300))
+}
+
+fun minimalistPopEnterTransition(): EnterTransition {
+    return slideInHorizontally(
+        initialOffsetX = { width -> -width },
+        animationSpec = tween(300, easing = LinearOutSlowInEasing)
+    ) + fadeIn(animationSpec = tween(300))
+}
+
+fun minimalistPopExitTransition(): ExitTransition {
+    return slideOutHorizontally(
+        targetOffsetX = { width -> width },
+        animationSpec = tween(300, easing = LinearOutSlowInEasing)
+    ) + fadeOut(animationSpec = tween(300))
 }

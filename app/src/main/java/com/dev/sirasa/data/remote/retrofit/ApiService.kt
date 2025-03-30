@@ -14,6 +14,7 @@ import com.dev.sirasa.data.remote.response.booking.BookingUserResponse
 import com.dev.sirasa.data.remote.response.booking.BookingValidationResponse
 import com.dev.sirasa.data.remote.response.booking.GetBookingsPaginateResponse
 import com.dev.sirasa.data.remote.response.crm.SummaryDataResponse
+import com.dev.sirasa.data.remote.response.faq.FaqResponse
 import com.dev.sirasa.data.remote.response.room.CreateRoomResponse
 import com.dev.sirasa.data.remote.response.room.DeletedRoomResponse
 import com.dev.sirasa.data.remote.response.room.RoomDetailResponse
@@ -232,4 +233,6 @@ interface ApiService {
         @Query("endDate") endDate: String?
     ): Response<ResponseBody>
 
+    @GET("faq")
+    suspend fun getAllFaq(): FaqResponse
 }

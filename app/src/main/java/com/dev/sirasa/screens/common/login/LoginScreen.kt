@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.dev.sirasa.MainViewModel
 import com.dev.sirasa.R
 import com.dev.sirasa.ui.component.LoadingCircular
 import com.dev.sirasa.ui.component.PasswordField
@@ -30,7 +31,8 @@ import com.dev.sirasa.ui.theme.Typography
 fun LoginScreen(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val loginState by viewModel.loginState.collectAsState()
     var selectedOption by remember { mutableIntStateOf(0) }
@@ -222,7 +224,9 @@ fun LoginScreen(
                         email.takeIf { selectedOption == 0 },
                         nim.takeIf { selectedOption == 1 },
                         password
-                    )
+                    ) { role ->
+                        mainViewModel.setUserRole(role)
+                    }
                 },
                 enabled = (if (loginState is LoginState.Loading) false else true),
                 modifier = Modifier.fillMaxWidth(),
