@@ -2,7 +2,9 @@ package com.dev.sirasa.screens.common.register
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,6 +57,7 @@ fun RegisterScreen(
     Box (
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ){
         Column(
@@ -65,7 +68,7 @@ fun RegisterScreen(
                 contentDescription = "Logo Sirasa",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp)
+                    .padding(top = 14.dp)
                     .height(100.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -79,10 +82,10 @@ fun RegisterScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            InputField(label = "Nama Lengkap", placeHolder = "Masukkan Nama Lengkap" ,value = name, onValueChange = { name = it })
-            InputField(label = "Email",placeHolder = "Masukkan Email" , value = email, onValueChange = { email = it }, keyboardType = KeyboardType.Email)
-            InputField(label = "Nomor Telepon", placeHolder = "Masukkan No Telepon" ,value = phoneNumber, onValueChange = { phoneNumber = it }, keyboardType = KeyboardType.Phone)
-            InputField(label = "NIM",placeHolder = "Masukkan NIM" ,value = nim, onValueChange = { nim = it }, keyboardType = KeyboardType.Number)
+            InputField(label = "Nama Lengkap", placeHolder = "Masukkan Nama Lengkap" ,value = name, onValueChange = { name = it }, maxLines = 1)
+            InputField(label = "Email",placeHolder = "Masukkan Email" , value = email, onValueChange = { email = it }, keyboardType = KeyboardType.Email, maxLines = 1)
+            InputField(label = "Nomor Telepon", placeHolder = "Masukkan No Telepon" ,value = phoneNumber, onValueChange = { phoneNumber = it }, keyboardType = KeyboardType.Phone, maxLines = 1)
+            InputField(label = "NIM",placeHolder = "Masukkan NIM" ,value = nim, onValueChange = { nim = it }, keyboardType = KeyboardType.Number, maxLines = 1)
             PasswordField(label = "Password", value = password, onValueChange = { password = it }, passwordVisible = passwordVisible, onTogglePassword = { passwordVisible = !passwordVisible })
             PasswordField(label = "Konfirmasi Password", value = passwordConfirm, onValueChange = { passwordConfirm = it }, passwordVisible = passwordConfirmVisible, onTogglePassword = { passwordConfirmVisible = !passwordConfirmVisible })
             Spacer(modifier = Modifier.height(16.dp))

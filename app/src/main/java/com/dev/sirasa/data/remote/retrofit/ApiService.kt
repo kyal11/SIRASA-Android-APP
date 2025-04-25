@@ -3,6 +3,7 @@ package com.dev.sirasa.data.remote.retrofit
 import com.dev.sirasa.data.remote.response.auth.EmailResetPasswordResponse
 import com.dev.sirasa.data.remote.response.auth.EmailVerifiedResponse
 import com.dev.sirasa.data.remote.response.auth.LoginResponse
+import com.dev.sirasa.data.remote.response.auth.LogoutRequest
 import com.dev.sirasa.data.remote.response.auth.LogoutResponse
 import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.response.auth.RegisterResponse
@@ -66,7 +67,7 @@ interface ApiService {
     ): LoginResponse
 
     @POST("logout")
-    suspend fun logout(): LogoutResponse
+    suspend fun logout(@Body body: LogoutRequest): LogoutResponse
 
     @POST("refresh-token")
     suspend fun refreshToken(): RefreshTokenResponse

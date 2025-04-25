@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -160,6 +161,7 @@ fun LoginScreen(
                         validateNIM(newValue)
                     }
                 },
+                maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,7 +175,8 @@ fun LoginScreen(
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = if (selectedOption == 0) KeyboardType.Email else KeyboardType.Number
+                    keyboardType = if (selectedOption == 0) KeyboardType.Email else KeyboardType.Number,
+                    imeAction = ImeAction.Done
                 ),
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(

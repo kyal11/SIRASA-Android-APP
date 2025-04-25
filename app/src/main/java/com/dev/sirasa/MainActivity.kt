@@ -2,6 +2,7 @@ package com.dev.sirasa
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -55,6 +56,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -80,6 +82,7 @@ import com.dev.sirasa.screens.common.contact.ContactUsScreen
 import com.dev.sirasa.screens.common.faq.FaqScreen
 import com.dev.sirasa.screens.user.history.MoreBookingScreen
 import com.dev.sirasa.screens.user.history.MoreHistoryScreen
+import com.dev.sirasa.ui.theme.Typography
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -88,6 +91,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        processIntent(intent)
         requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 Log.d("Permission", "Notification permission granted.")
@@ -137,7 +141,7 @@ class MainActivity : ComponentActivity() {
                         Scaffold { innerPadding ->
                             NavHost(
                                 navController = navController, startDestination = route,
-                                modifier = Modifier.padding(innerPadding)
+                                modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
                             ) {
                                 composable("main_screen_user") { MainScreenUser(snackbarHostState) }
                                 composable("main_screen_admin") { MainScreenAdmin(snackbarHostState, userRole) }
@@ -148,6 +152,18 @@ class MainActivity : ComponentActivity() {
                     else -> {}
                 }
             }
+        }
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        processIntent(intent)
+    }
+
+    private fun processIntent(intent: Intent?) {
+        intent?.data?.let { uri ->
+            Log.d("DeepLink", "Processing intent in MainActivity: $uri")
+            viewModel.processDeepLink(uri)
         }
     }
 }
@@ -162,10 +178,11 @@ fun AuthScreen(snackbarHostState: SnackbarHostState, viewModel: MainViewModel = 
     val context = LocalContext.current
     val intent = (context as? Activity)?.intent
     val coroutineScope = rememberCoroutineScope()
+    val deepLinkUri by viewModel.deepLinkUri.collectAsState()
     val userRole by viewModel.userRole.collectAsState()
     Log.d("role user in authscreen : ", "${userRole}")
-    LaunchedEffect(intent?.data) {
-        intent?.data?.let { uri ->
+    LaunchedEffect(deepLinkUri) {
+        deepLinkUri?.let { uri ->
             Log.d("DeepLink", "Received deep link: $uri")
 
             val resetToken = uri.getQueryParameter("token")
@@ -330,7 +347,8 @@ fun MainScreenAdmin(snackbarHostState: SnackbarHostState, userRole: String?) {
             enterTransition = { minimalistEnterTransition() },
             exitTransition = { minimalistExitTransition() },
             popEnterTransition = { minimalistPopEnterTransition() },
-            popExitTransition = { minimalistPopExitTransition() }
+            popExitTransition = { minimalistPopExitTransition() },
+
         ) {
             composable(BottomNavItemAdmin.Home.route) {
                 Box(

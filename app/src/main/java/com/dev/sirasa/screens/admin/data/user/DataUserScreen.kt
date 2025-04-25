@@ -37,6 +37,8 @@ import com.dev.sirasa.ui.component.convertMillisToApiFormat
 import com.dev.sirasa.ui.theme.Green700
 import com.dev.sirasa.ui.theme.Typography
 import android.content.Context
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.platform.LocalContext
 import com.dev.sirasa.ui.component.DateFieldFilter
 
@@ -79,7 +81,7 @@ fun DataUserScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Data Users"
+                        "Data Pengguna"
                     )
                 },
                 navigationIcon = {
@@ -113,7 +115,7 @@ fun DataUserScreen(
             ) {
                 InputFieldSearch(
                     label = "Search",
-                    placeHolder = "Enter name",
+                    placeHolder = "Masukkan Nama/NIM",
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth()
@@ -122,7 +124,7 @@ fun DataUserScreen(
                 // Role Filter
                 if (userRole == "superadmin") {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         roles.forEach { role ->

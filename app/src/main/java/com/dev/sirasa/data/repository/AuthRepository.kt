@@ -5,6 +5,7 @@ import com.dev.sirasa.data.local.UserPreference
 import com.dev.sirasa.data.remote.response.auth.EmailResetPasswordResponse
 import com.dev.sirasa.data.remote.response.auth.EmailVerifiedResponse
 import com.dev.sirasa.data.remote.response.auth.LoginResponse
+import com.dev.sirasa.data.remote.response.auth.LogoutRequest
 import com.dev.sirasa.data.remote.response.auth.LogoutResponse
 import com.dev.sirasa.data.remote.response.auth.RefreshTokenResponse
 import com.dev.sirasa.data.remote.retrofit.ApiService
@@ -31,9 +32,9 @@ class AuthRepository @Inject constructor(
         emit(apiService.login(email, nim, password, deviceToken))
     }
 
-    suspend fun logout(): Flow<LogoutResponse> = flow {
+    suspend fun logout(deviceToken: String?): Flow<LogoutResponse> = flow {
+        emit(apiService.logout(LogoutRequest(deviceToken)))
         userPreference.clearSession()
-        emit(apiService.logout())
     }
 
     suspend fun refreshToken(): Flow<RefreshTokenResponse> = flow {

@@ -10,6 +10,7 @@ import com.dev.sirasa.data.remote.response.user.UpdateAccount
 import com.dev.sirasa.data.repository.AuthRepository
 import com.dev.sirasa.data.repository.UsersRepository
 import com.dev.sirasa.utils.ImageCompressor
+import com.google.firebase.messaging.FirebaseMessaging.getInstance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +32,11 @@ class ProfileViewModel @Inject constructor(
     private val _userData = MutableStateFlow<DataUser?>(null)
     val userData: StateFlow<DataUser?> = _userData
 
+    private var deviceToken: String? = null
+
     init {
         fetchUserProfile()
+        fetchFCMToken()
     }
 
     fun fetchUserProfile() {
@@ -45,7 +49,7 @@ class ProfileViewModel @Inject constructor(
                 }
                 .collectLatest { response ->
                     _userData.value = response.data
-                    _profileState.value = ProfileState.Success
+//                    _profileState.value = ProfileState.Success("Update Success")
                 }
         }
     }
@@ -53,18 +57,22 @@ class ProfileViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             _profileState.value = ProfileState.Loading
-            authRepository.logout()
-                .catch { e ->
-                    Log.e("ProfileViewModel", "Error logging out: ${e.message}")
-                    _profileState.value = ProfileState.Error(e.message ?: "Unknown Error")
-                }
-                .collectLatest { response ->
-                    if (response.status == "success") {
-                        _profileState.value = ProfileState.Success
-                    } else {
-                        _profileState.value = ProfileState.Error(response.message ?: "Logout failed")
+            deviceToken?.let {
+                authRepository.logout(deviceToken)
+//                    .catch { e ->
+//                        Log.e("ProfileViewModel", "Error logging out: ${e.message}")
+//                        _profileState.value = ProfileState.Error(e.message ?: "Unknown Error")
+//                    }
+                    .collectLatest { response ->
+                        if (response.status == "success") {
+                            _profileState.value = ProfileState.Success("Logout Success")
+                        }
+//                        else {
+//                            _profileState.value =
+//                                ProfileState.Error(response.message ?: "Logout failed")
+//                        }
                     }
-                }
+            }
         }
     }
 
@@ -78,7 +86,7 @@ class ProfileViewModel @Inject constructor(
                 }
                 .collectLatest { response ->
                     _userData.value = response.data
-                    _profileState.value = ProfileState.Success
+                    _profileState.value = ProfileState.Success("Update Success")
                 }
         }
     }
@@ -96,7 +104,7 @@ class ProfileViewModel @Inject constructor(
                     }
                     .collectLatest { response ->
                         _userData.value = response.data
-                        _profileState.value = ProfileState.Success
+                        _profileState.value = ProfileState.Success("Update Success")
                     }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Error processing image: ${e.message}")
@@ -104,5 +112,14 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
-
+    private fun fetchFCMToken() {
+        getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                deviceToken = task.result
+                Log.d("FCM Token", "Token: $deviceToken")
+            } else {
+                Log.w("FCM Token", "Fetching FCM token failed", task.exception)
+            }
+        }
+    }
 }

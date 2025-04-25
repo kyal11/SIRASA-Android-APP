@@ -25,14 +25,35 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dev.sirasa.R
 import com.dev.sirasa.ui.theme.Typography
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.foundation.text.KeyboardActions
 
 @Composable
-fun PasswordField(label: String, value: String, onValueChange: (String) -> Unit, passwordVisible: Boolean, onTogglePassword: () -> Unit) {
+fun PasswordField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onTogglePassword: () -> Unit
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = label, style = Typography.bodyMedium, modifier = Modifier.padding(bottom = 8.dp))
+        Text(
+            text = label,
+            style = Typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
         OutlinedTextField(
             value = value,
-            onValueChange = onValueChange,
+            maxLines = 1,
+            onValueChange = {
+                if (!it.contains("\n")) {
+                    onValueChange(it)
+                }
+            },
             textStyle = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -42,9 +63,19 @@ fun PasswordField(label: String, value: String, onValueChange: (String) -> Unit,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color(0xFFE2E8F0),
             ),
-            placeholder = { Text("Masukkan $label", style = Typography.bodyMedium, color = Color.Gray) },
+            placeholder = {
+                Text("Masukkan $label", style = Typography.bodyMedium, color = Color.Gray)
+            },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
+            ),
             trailingIcon = {
                 IconButton(onClick = onTogglePassword) {
                     Icon(
@@ -56,5 +87,6 @@ fun PasswordField(label: String, value: String, onValueChange: (String) -> Unit,
             }
         )
     }
+
     Spacer(modifier = Modifier.height(8.dp))
 }

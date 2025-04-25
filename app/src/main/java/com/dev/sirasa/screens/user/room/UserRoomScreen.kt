@@ -81,8 +81,7 @@ fun UserRoomScreen(viewModel: RoomViewModel = hiltViewModel()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .padding(WindowInsets.navigationBars.asPaddingValues()),
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(

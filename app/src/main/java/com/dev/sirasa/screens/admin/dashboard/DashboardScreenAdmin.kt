@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
@@ -53,7 +56,7 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
     val dashboardState by viewModel.dashboardState.collectAsState()
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale("id", "ID"))
-
+    val scrollState = rememberScrollState()
     val selectedDate = remember(selectedOption) {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_YEAR, selectedOption) // 0 = Hari ini, 1 = Besok, 2 = Lusa
@@ -66,7 +69,7 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp)
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp).verticalScroll(scrollState)
     ) {
         Text(
             "Selamat Datang, Admin",

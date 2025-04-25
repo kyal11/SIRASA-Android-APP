@@ -9,7 +9,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -46,7 +49,7 @@ fun ProfileScreen(
     var showImageDialog by remember { mutableStateOf(false) }
     var editingField by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
+    val scrollState = rememberScrollState()
     val profileState by viewModel.profileState.collectAsState()
     val userData by viewModel.userData.collectAsState()
     val context = LocalContext.current
@@ -64,6 +67,10 @@ fun ProfileScreen(
                 val errorMessage = (profileState as ProfileState.Error).message
                 snackbarHostState.showSnackbar(message = errorMessage, actionLabel = "OK")
             }
+            is ProfileState.Success -> {
+                val successMessage = (profileState as ProfileState.Success).message
+                snackbarHostState.showSnackbar(message = successMessage)
+            }
             else -> {}
         }
     }
@@ -71,11 +78,12 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 16.dp),
+            .verticalScroll(scrollState)
+            .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
@@ -101,7 +109,7 @@ fun ProfileScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Profile Image
         Box(
@@ -134,11 +142,11 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = userData?.name ?: "John Doe",
+            text = userData?.name ?: "",
             style = MaterialTheme.typography.titleLarge
         )
         Text(
-            text = userData?.email ?: "john.doe@example.com",
+            text = userData?.email ?: "",
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -156,7 +164,7 @@ fun ProfileScreen(
             Column(modifier = Modifier.padding(16.dp)) {
                 ProfileDetail(
                     label = "Name",
-                    value = userData?.name ?: "John Doe",
+                    value = userData?.name ?: "",
                     onEdit = {
                         editingField = "name"
                         showEditDialog = true
@@ -164,15 +172,15 @@ fun ProfileScreen(
                 )
                 ProfileDetail(
                     label = "Email",
-                    value = userData?.email ?: "john.doe@example.com"
+                    value = userData?.email ?: ""
                 )
                 ProfileDetail(
                     label = "NIM",
-                    value = userData?.nim ?: "123456789",
+                    value = userData?.nim ?: ""
                 )
                 ProfileDetail(
                     label = "No Telepon",
-                    value = userData?.phoneNumber ?: "Nope",
+                    value = userData?.phoneNumber ?: "",
                     onEdit = {
                         editingField = "phoneNumber"
                         showEditDialog = true
@@ -213,13 +221,12 @@ fun ProfileScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Tampilkan gambar yang dipilih atau gambar profil saat ini
                 AsyncImage(
                     model = selectedImageUri ?: userData?.imageUrl?.let { "https://sirasa.teamteaguard.com$it" } ?: R.drawable.profile_user,
                     contentDescription = "Expanded Profile Photo",
                     modifier = Modifier
-                        .size(300.dp)
-                        .clip(RoundedCornerShape(16.dp)),
+                        .size(250.dp)
+                        .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
 
@@ -306,6 +313,7 @@ fun ProfileScreen(
                 TextButton(onClick = {
                     showLogoutDialog = false
                     viewModel.logout()
+                    navController.navigate("auth_screen")
                 }) {
                     Text("Yes")
                 }

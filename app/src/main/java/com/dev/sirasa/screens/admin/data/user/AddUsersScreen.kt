@@ -94,7 +94,7 @@ fun AddUserScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Tambah User") },
+                title = { Text("Tambah Pengguna") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -165,7 +165,7 @@ fun AddUserScreen(
                     if (addUserState is DataAddUserState.Loading) {
                         LoadingCircular(true, Modifier)
                     } else {
-                        Text(text = "Tambah User")
+                        Text(text = "Tambah Pengguna")
                     }
                 }
 

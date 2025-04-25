@@ -85,7 +85,7 @@ fun EditRoomScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Edit Room Data") },
+                title = { Text("Edit Data Ruangan") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -125,10 +125,10 @@ fun EditRoomScreen(
                 }
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TimePickerField("Start Time", startTime, Modifier.weight(1f).padding(end = 8.dp), readOnly = userRole != "superadmin") {
+                    TimePickerField("Waktu Mulai", startTime, Modifier.weight(1f).padding(end = 8.dp), readOnly = userRole != "superadmin") {
                         startTime = it
                     }
-                    TimePickerField("End Time", endTime, Modifier.weight(1f).padding(start = 8.dp), readOnly = userRole != "superadmin") {
+                    TimePickerField("Waktu Selesai", endTime, Modifier.weight(1f).padding(start = 8.dp), readOnly = userRole != "superadmin") {
                         endTime = it
                     }
                 }

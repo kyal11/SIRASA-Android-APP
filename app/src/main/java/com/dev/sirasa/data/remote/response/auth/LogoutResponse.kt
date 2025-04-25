@@ -13,3 +13,5 @@ data class LogoutResponse(
 	@field:SerializedName("status")
 	val status: String? = null
 )
+
+data class LogoutRequest(val deviceToken: String?)

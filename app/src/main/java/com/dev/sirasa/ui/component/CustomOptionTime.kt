@@ -41,11 +41,11 @@ fun CustomOptionTime(
         Log.d("CustomOptionTime2", "🔍 Initial Selected Slot IDs: $selectedOptions")
     }
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Slot Waktu",
-            style = Typography.displayMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+//        Text(
+//            text = "Slot Waktu",
+//            style = Typography.displayMedium,
+//            modifier = Modifier.padding(bottom = 8.dp)
+//        )
 
         OutlinedTextField(
             value = selectedItems

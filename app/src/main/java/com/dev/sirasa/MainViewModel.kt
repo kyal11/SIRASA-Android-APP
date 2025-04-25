@@ -1,6 +1,7 @@
 package com.dev.sirasa
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +27,13 @@ class MainViewModel @Inject constructor(
 
     private val _userRole = MutableStateFlow<String?>(null)
     val userRole: StateFlow<String?> = _userRole
+    // Di MainViewModel, tambahkan:
+    private val _deepLinkUri = MutableStateFlow<Uri?>(null)
+    val deepLinkUri = _deepLinkUri.asStateFlow()
 
+    fun processDeepLink(uri: Uri?) {
+        _deepLinkUri.value = uri
+    }
     fun validateEmail(token: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             authRepository.ValidateEmail(token)

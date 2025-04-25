@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -120,7 +121,7 @@ fun DataScreen(navController: NavController, viewModel: DataViewModel = hiltView
 
                     // Data Booking Card
                     CardDataBooking(
-                        title = "Data Booking",
+                        title = "Data Peminjaman",
                         total = data.booking?.totalBooking.toString(),
                         bookingData = listOf(
                             "Selesai" to data.booking?.totalDone.toString(),
@@ -289,9 +290,35 @@ fun CardDataRoom(title: String, total: String, roomData: List<Triple<String?, St
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Name", style = Typography.labelLarge, modifier = Modifier.weight(2f))
-                Text(text = "Capacity", style = Typography.labelLarge, modifier = Modifier.weight(1f))
-                Text(text = "Time", style = Typography.labelLarge, modifier = Modifier.weight(2f), textAlign = TextAlign.End)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Name",
+                        style = Typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(2f)
+                    )
+                    Text(
+                        text = "Kapasitas",
+                        style = Typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1.5f)
+                    )
+                    Text(
+                        text = "Waktu Operasi",
+                        style = Typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.weight(2f)
+                    )
+                }
+
             }
             Divider()
 
@@ -312,9 +339,9 @@ fun RoomDataRow(name: String, capacity: String, time: String) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
-        Text(text = name, style = Typography.bodyMedium, modifier = Modifier.weight(2f))
-        Text(text = capacity, style = Typography.bodyMedium, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-        Text(text = time, style = Typography.bodyMedium, modifier = Modifier.weight(2f), textAlign = TextAlign.End)
+        Text(text = name, style = Typography.bodySmall, modifier = Modifier.weight(2f))
+        Text(text = capacity, style = Typography.bodySmall, modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
+        Text(text = time, style = Typography.bodySmall, modifier = Modifier.weight(2f), textAlign = TextAlign.End)
     }
 }
 //@Preview(showBackground = true)

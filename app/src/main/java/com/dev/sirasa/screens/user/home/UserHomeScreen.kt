@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -140,10 +141,19 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
     } ?: emptyList()
 
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        val screenHeight = maxHeight
+        val screenWidth = maxWidth
+
+        // Compute scaling factor for small screens
+        val scaleFactor = minOf(screenHeight / 800.dp, screenWidth / 360.dp, 1f)
+        val dynamicPadding = (16 * scaleFactor).dp
+        val dynamicSpacing = (8 * scaleFactor).dp
+        val logoHeight = (100 * scaleFactor).dp
+        val buttonHeight = (45 * scaleFactor).dp
         Column(
             modifier = Modifier.fillMaxSize().padding(vertical = 4.dp, horizontal = 16.dp)
                 .navigationBarsPadding().verticalScroll(rememberScrollState()),
@@ -152,17 +162,21 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
             Image(
                 painter = painterResource(id = R.drawable.logo_sirasa),
                 contentDescription = "Logo Sirasa",
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(100.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).height(logoHeight)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Selamat Datang di SIRASA",
-                style = Typography.displayLarge
+                style = Typography.displayLarge.copy(
+                    fontSize = Typography.displayLarge.fontSize * scaleFactor
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Silakan isi formulir di bawah ini untuk meminjam ruang diskusi kami.",
-                style = Typography.displayMedium,
+                style = Typography.displayMedium.copy(
+                    fontSize = Typography.displayMedium.fontSize * scaleFactor
+                ),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -202,54 +216,69 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    CustomOptionTime(
-                        if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
-                        options = availableSlots,
-                        selectedOptions = selectedSlots.mapNotNull { id ->
-                            availableSlots.find { it.second == id }?.first
-                        },
-                        onOptionSelected = { selectedText ->
-                            selectedSlots = selectedText
-                            if (selectedText.isNotEmpty()) slotError = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (slotError) {
-                        Text(
-                            text = "Harap pilih slot waktu",
-                            color = Color.Red,
-                            style = Typography.bodySmall,
-                            modifier = Modifier.align(Alignment.Start)
-                        )
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Slot Waktu",
+                                style = Typography.displayMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                        Column(modifier = Modifier.width(140.dp)) {
+                            Text(text = "Jumlah Peserta", style = Typography.displayMedium, modifier = Modifier.padding(bottom = 8.dp))
+                        }
                     }
-                }
-                Column(modifier = Modifier.width(120.dp)) {
-                    InputField(
-                        label = "Jumlah Peserta",
-                        placeHolder = "Peserta",
-                        value = capacity,
-                        onValueChange = {
-                            capacity = it
-                            capacityError = it.isEmpty() },
-                        keyboardType = KeyboardType.Number,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (capacityError) {
-                        Text(
-                            text = "Harus diisi",
-                            color = Color.Red,
-                            style = Typography.bodySmall,
-                            modifier = Modifier.align(Alignment.Start)
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            CustomOptionTime(
+                                if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
+                                options = availableSlots,
+                                selectedOptions = selectedSlots.mapNotNull { id ->
+                                    availableSlots.find { it.second == id }?.first
+                                },
+                                onOptionSelected = { selectedText ->
+                                    selectedSlots = selectedText
+                                    if (selectedText.isNotEmpty()) slotError = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            if (slotError) {
+                                Text(
+                                    text = "Harap pilih slot waktu",
+                                    color = Color.Red,
+                                    style = Typography.bodySmall,
+                                    modifier = Modifier.align(Alignment.Start)
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.width(140.dp)){
+                            InputField(
+                                placeHolder = "Peserta",
+                                value = capacity,
+                                onValueChange = {
+                                    capacity = it
+                                    capacityError = it.isEmpty() },
+                                keyboardType = KeyboardType.Number,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            if (capacityError) {
+                                Text(
+                                    text = "Harus diisi",
+                                    color = Color.Red,
+                                    style = Typography.bodySmall,
+                                    modifier = Modifier.align(Alignment.Start)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -261,15 +290,17 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
                 { description = it },
                 KeyboardType.Text
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(color = Color.Red)) { append("* ") }
                     append("Harap diperhatikan: Jika Anda tidak tiba di resepsionis dalam 10 menit setelah waktu mulai yang Anda pilih, reservasi akan otomatis dibatalkan.")
                 },
-                style = Typography.titleMedium,
+                style = Typography.titleMedium.copy(
+                    fontSize = Typography.titleMedium.fontSize * scaleFactor
+                ),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = dynamicPadding / 2)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Button(
@@ -289,7 +320,7 @@ fun UserHomeScreen(snackbarHostState: SnackbarHostState, userViewModel: UserView
                         userViewModel.createBooking(request)
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier.fillMaxWidth().height(buttonHeight),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(text = "Submit", style = Typography.titleMedium)

@@ -161,7 +161,7 @@ fun AddBookingScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Add Booking Data") },
+                title = { Text("Tambah Data Peminjaman") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -227,46 +227,67 @@ fun AddBookingScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        CustomOptionTime(
-                            if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
-                            options = availableSlots,
-                            selectedOptions = selectedSlots.mapNotNull { id ->
-                                availableSlots.find { it.second == id }?.first
-                            },
-                            onOptionSelected = { selectedText ->
-                                selectedSlots = selectedText
-                                if (selectedText.isNotEmpty()) slotError = false
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        if (slotError) {
-                            Text(
-                                text = "Harap pilih slot waktu",
-                                color = Color.Red,
-                                style = Typography.bodySmall,
-                                modifier = Modifier.align(Alignment.Start)
-                            )
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Slot Waktu",
+                                    style = Typography.displayMedium,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                            Column(modifier = Modifier.width(140.dp)) {
+                                Text(text = "Jumlah Peserta", style = Typography.displayMedium, modifier = Modifier.padding(bottom = 8.dp))
+                            }
                         }
-                    }
-                    Column(modifier = Modifier.width(120.dp)) {
-                        InputField(
-                            label = "Jumlah Peserta",
-                            placeHolder = "Peserta",
-                            value = capacity,
-                            onValueChange = {
-                                capacity = it
-                                capacityError = it.isEmpty() },
-                            keyboardType = KeyboardType.Number,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        if (capacityError) {
-                            Text(
-                                text = "Harus diisi",
-                                color = Color.Red,
-                                style = Typography.bodySmall,
-                                modifier = Modifier.align(Alignment.Start)
-                            )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                CustomOptionTime(
+                                    if (selectedRoomName.isEmpty() && selectedDate == null) true else false,
+                                    options = availableSlots,
+                                    selectedOptions = selectedSlots.mapNotNull { id ->
+                                        availableSlots.find { it.second == id }?.first
+                                    },
+                                    onOptionSelected = { selectedText ->
+                                        selectedSlots = selectedText
+                                        if (selectedText.isNotEmpty()) slotError = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                if (slotError) {
+                                    Text(
+                                        text = "Harap pilih slot waktu",
+                                        color = Color.Red,
+                                        style = Typography.bodySmall,
+                                        modifier = Modifier.align(Alignment.Start)
+                                    )
+                                }
+                            }
+                            Column(modifier = Modifier.width(140.dp)){
+                                InputField(
+                                    placeHolder = "Peserta",
+                                    value = capacity,
+                                    onValueChange = {
+                                        capacity = it
+                                        capacityError = it.isEmpty() },
+                                    keyboardType = KeyboardType.Number,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                if (capacityError) {
+                                    Text(
+                                        text = "Harus diisi",
+                                        color = Color.Red,
+                                        style = Typography.bodySmall,
+                                        modifier = Modifier.align(Alignment.Start)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
