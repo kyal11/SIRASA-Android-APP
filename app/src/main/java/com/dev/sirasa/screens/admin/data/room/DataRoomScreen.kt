@@ -77,7 +77,7 @@ fun DataRoomScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Room Data") },
+                title = { Text("Data Ruangan") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
