@@ -37,6 +37,7 @@ import com.dev.sirasa.R
 import com.dev.sirasa.data.remote.response.user.UpdateAccount
 import com.dev.sirasa.ui.theme.SirasaTheme
 import com.dev.sirasa.ui.theme.Typography
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ProfileScreen(
@@ -66,10 +67,13 @@ fun ProfileScreen(
             is ProfileState.Error -> {
                 val errorMessage = (profileState as ProfileState.Error).message
                 snackbarHostState.showSnackbar(message = errorMessage, actionLabel = "OK")
+                viewModel.resetProfileState()
             }
             is ProfileState.Success -> {
                 val successMessage = (profileState as ProfileState.Success).message
-                snackbarHostState.showSnackbar(message = successMessage)
+                Log.d("Logout", "msg success profile: $successMessage")
+                snackbarHostState.showSnackbar(message = successMessage, actionLabel = "Tutup")
+                viewModel.resetProfileState()
             }
             else -> {}
         }
@@ -266,9 +270,8 @@ fun ProfileScreen(
                                     selectedImageUri = null
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Green
-                            ),
+                            modifier = Modifier
+                                .padding(vertical = 8.dp),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("Save")

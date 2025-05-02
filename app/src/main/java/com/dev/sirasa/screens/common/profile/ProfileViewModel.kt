@@ -38,6 +38,9 @@ class ProfileViewModel @Inject constructor(
         fetchUserProfile()
         fetchFCMToken()
     }
+    fun resetProfileState() {
+        _profileState.value = ProfileState.Loading
+    }
 
     fun fetchUserProfile() {
         viewModelScope.launch {

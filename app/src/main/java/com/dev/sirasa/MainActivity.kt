@@ -138,7 +138,9 @@ class MainActivity : ComponentActivity() {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
-                        Scaffold { innerPadding ->
+                        Scaffold(
+                            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                        ) { innerPadding ->
                             NavHost(
                                 navController = navController, startDestination = route,
                                 modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
