@@ -7,7 +7,7 @@ converterGson = "2.11.0"
 core = "3.5.1"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.2"
-hiltAndroidCompiler = "2.51.1"
+hiltAndroidCompiler = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 jwtdecodeVersion = "2.0.2"
 kotlin = "2.0.0"
@@ -30,6 +30,7 @@ uiTextGoogleFonts = "1.7.8"
 appcompat = "1.6.1"
 material = "1.10.0"
 activity = "1.10.1"
+junitJupiter = "5.8.1"
 
 [libraries]
 android-jwtdecode = { module = "com.auth0.android:jwtdecode", version.ref = "jwtdecodeVersion" }
@@ -52,6 +53,8 @@ converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref
 core = { module = "com.google.zxing:core", version.ref = "core" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidCompiler" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroidCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -74,6 +77,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converte
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -81,3 +85,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version = "2.0.0-1.0.23" }
+dagger-hilt = { id = "com.google.dagger.hilt.android", version = "2.56.2" }
