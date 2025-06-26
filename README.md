@@ -1,6 +1,6 @@
 # 📱 Sirasa App (Android)
 
-**Sirasa App** adalah aplikasi mobile Android untuk sistem peminjaman ruang diskusi di perpustakaan **UPN Veteran Jakarta**. Aplikasi ini terhubung dengan backend [sirasa-service](https://github.com/namamu/sirasa-service) dan dirancang untuk memudahkan mahasiswa dalam melakukan booking ruang diskusi, validasi QR Code, dan mendapatkan notifikasi terkait peminjaman.
+**Sirasa App** adalah aplikasi mobile Android untuk sistem peminjaman ruang diskusi di perpustakaan **UPN Veteran Jakarta**. Aplikasi ini terhubung dengan backend [sirasa-service](https://github.com/kyal11/SIRASA-Service) dan dirancang untuk memudahkan mahasiswa dalam melakukan booking ruang diskusi, validasi QR Code, dan mendapatkan notifikasi terkait peminjaman.
 
 ---
 
